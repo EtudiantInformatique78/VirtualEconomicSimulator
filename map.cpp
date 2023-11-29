@@ -78,6 +78,8 @@ void Map::drawSolution(std::shared_ptr<Node> finalNode) const
 		}
 		std::cout << std::endl;
 	}
+	double distanceLastFirst = getDistanceBetweenTwoPoint(finalNode->getPoint()->getX(), finalNode->getPoint()->getY(), firstNode->getPoint()->getX(), firstNode->getPoint()->getY());
+	std::cout << distanceLastFirst << std::endl;
 }
 
 // Display the map
@@ -271,7 +273,7 @@ void Map::searchForPath(int startingX, int startingY, int destinationX, int dest
 		return;
 	}
 
-	// We choose unordered map for fast access to elements, easy insert / delete anywhere in the list, as theya re not contiguous in memory
+	// We choose unordered map for fast access to elements, easy insert / delete anywhere in the list, as they are not contiguous in memory
 	// Open list store node to inspect
 	std::unordered_map<std::string, std::shared_ptr<Node>> openList;
 	// Close list store explored nodes
@@ -289,6 +291,7 @@ void Map::searchForPath(int startingX, int startingY, int destinationX, int dest
 		const std::string currentNodeKey = std::to_string(currentNode->getPoint()->getX()) + ';' + std::to_string(currentNode->getPoint()->getY());
 		closeList.insert({ currentNodeKey, currentNode });
 		openList.erase(currentNodeKey);
+		
 
 		// Win condition
 		if (currentNode->getPoint()->getX() == destinationX && currentNode->getPoint()->getY() == destinationY)
@@ -354,6 +357,7 @@ void Map::searchForPath(int startingX, int startingY, int destinationX, int dest
 			// We need to work with raw pointer here to avoid circular dependencies, and as the value can be intialized with NULL, we didn't want to use weak_ptr, as we know the pointer won't expire
 			const std::shared_ptr<Node> node = std::make_shared<Node>(Node(adjacentNodes[i].getPoint(), currentNode.get(), fCost, distanceWithStart));
 			openList.insert({ std::to_string(node->getPoint()->getX()) + ';' + std::to_string(node->getPoint()->getY()) , node });
+
 		}
 	}
 }

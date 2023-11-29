@@ -31,10 +31,13 @@ int main()
 	auto t1 = std::chrono::high_resolution_clock::now();
 	map.searchForPath(0, 6, 7, 7);
 	auto t2 = std::chrono::high_resolution_clock::now();
+	
 
 	std::cout << std::endl << "----------- PERFORMANCE -----------" << std::endl << std::endl;
 	std::chrono::duration<double, std::milli> ms_double = t2 - t1;
 	std::cout << "It tooks " << ms_double.count() << "ms to find the path." << std::endl;
+
+
 
 	return 0;
 }
