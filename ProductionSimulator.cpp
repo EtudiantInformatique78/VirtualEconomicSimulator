@@ -2,10 +2,35 @@
 //
 
 #include <iostream>
+#include "Seller.h"
+
 
 int main()
 {
     std::cout << "Hello World!\n";
+
+    
+    std::shared_ptr<Subscriber> ts1 = std::shared_ptr<TreeSubscriber>(new TreeSubscriber());
+    std::shared_ptr<Subscriber> ts2 = std::shared_ptr<TreeSubscriber>(new TreeSubscriber());
+    std::shared_ptr<Subscriber> ts3 = std::shared_ptr<TreeSubscriber>(new TreeSubscriber());
+    std::shared_ptr<Subscriber> is1 = std::shared_ptr<IronSubscriber>(new IronSubscriber());
+
+    std::shared_ptr<Publisher> tp_ptr = std::shared_ptr<TreePublisher>(new TreePublisher());
+    std::shared_ptr<Publisher> ip_ptr = std::shared_ptr<IronPublisher>(new IronPublisher());
+
+
+    tp_ptr->subscribe(ts1);
+    tp_ptr->subscribe(ts2);
+    tp_ptr->subscribe(ts3);
+    ip_ptr->subscribe(is1);
+
+    tp_ptr->notifySubscriber();
+
+    ip_ptr->notifySubscriber();
+
+    tp_ptr->unsubscribe(ts2);
+    tp_ptr->notifySubscriber();
+
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu

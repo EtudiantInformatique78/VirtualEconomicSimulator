@@ -129,6 +129,17 @@
   <ItemGroup>
     <ClCompile Include="ProductionSimulator.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Builder.h" />
+    <ClInclude Include="Consumable.h" />
+    <ClInclude Include="ConsumableBuilder.h" />
+    <ClInclude Include="Factory.h" />
+    <ClInclude Include="map.h" />
+    <ClInclude Include="Product.h" />
+    <ClInclude Include="RawMaterials.h" />
+    <ClInclude Include="Seller.h" />
+    <ClInclude Include="TransformedMaterial.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

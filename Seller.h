@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <iostream>
 
 class Subscriber
 {
@@ -7,44 +8,89 @@ public:
 	virtual void update() = 0;
 };
 
-class TreeSubscriber : public Subscriber
+class Publisher
 {
+protected:
+	std::vector<std::shared_ptr<Subscriber>> vect;
+	//std::vector<Subscriber> vectSubscriber;
+
 public:
-	void update() override
-	{
-	
-	}
+	virtual void subscribe(std::shared_ptr<Subscriber> s) = 0;
+	virtual void unsubscribe(std::shared_ptr<Subscriber> s) = 0;
+	virtual void notifySubscriber() = 0;
 };
 
 
 
 
-class Publisher
+class TreeSubscriber : public Subscriber
 {
-protected:
-	std::vector<Subscriber> vectSubscriber;
-
 public:
-	void subscribe(Subscriber s)
+	void update() override
 	{
-		vectSubscriber.push_back(s);
+		std::cout << "I am getting a tree ! " << std::endl;
 	}
-	void unsubscribe(Subscriber s)
+};
+
+class TreePublisher : public Publisher
+{
+public:
+	void subscribe(std::shared_ptr<Subscriber> s) override
 	{
-		std::vector<Subscriber>::iterator position = std::find(vectSubscriber.begin(), vectSubscriber.end(), s);
-		if (position != vectSubscriber.end())
+		std::shared_ptr<TreeSubscriber> t =  std::dynamic_pointer_cast<TreeSubscriber>(s);
+		vect.push_back(t);
+	}
+	void unsubscribe(std::shared_ptr<Subscriber> s)  override
+	{
+		std::vector<std::shared_ptr<Subscriber>>::iterator position = std::find(vect.begin(), vect.end(), s);
+		if (position != vect.end())
 		{
-			vectSubscriber.erase(position);
+			vect.erase(position);
 		}
 	}
 
-	void notifySubscriber()
+	void notifySubscriber() override
 	{
-		std::vector<Subscriber>::iterator it;
-		for(it = vectSubscriber.begin(); it != vectSubscriber.end() ; ++it)
+		std::vector<std::shared_ptr<Subscriber>>::iterator it;
+		for (it = vect.begin(); it != vect.end(); ++it)
 		{
-			it->update();
+			it->get()->update();
+		}
+	}
+};
+
+class IronSubscriber : public Subscriber
+{
+public:
+	void update() override
+	{
+		std::cout << "I am getting an Iron ore ! " << std::endl;
+	}
+};
+
+class IronPublisher : public Publisher
+{
+public:
+	void subscribe(std::shared_ptr<Subscriber> s) override
+	{
+		std::shared_ptr<IronSubscriber> t = std::dynamic_pointer_cast<IronSubscriber>(s);
+		vect.push_back(t);
+	}
+	void unsubscribe(std::shared_ptr<Subscriber> s)  override
+	{
+		std::vector<std::shared_ptr<Subscriber>>::iterator position = std::find(vect.begin(), vect.end(), s);
+		if (position != vect.end())
+		{
+			vect.erase(position);
 		}
 	}
 
+	void notifySubscriber() override
+	{
+		std::vector<std::shared_ptr<Subscriber>>::iterator it;
+		for (it = vect.begin(); it != vect.end(); ++it)
+		{
+			it->get()->update();
+		}
+	}
 };
