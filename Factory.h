@@ -10,10 +10,10 @@ public:
 
 class TransformedMaterialFactory : public Factory
 {
-	virtual TransformedMaterial produceTransformedMaterial(RawMaterial rm) = 0;
+	virtual std::shared_ptr<TransformedMaterial> produceTransformedMaterial(std::shared_ptr<RawMaterial> rm) = 0;
 };
 
 class ConsumableFactory : public Factory
 {
-	virtual ConsommableGood produceTransformedMaterial(TransformedMaterial rm) = 0;
+	virtual std::shared_ptr<ConsommableGood> produceTransformedMaterial(std::shared_ptr<TransformedMaterial> rm) = 0;
 };
