@@ -1,6 +1,6 @@
 #include "map.h"
 
-Map::Map(int _xSize, int _ySize)
+Map::Map(int _xSize, int _ySize) : fastestPathNodes(0)
 {
 	std::deque<Point> initialPoint;
 	initialPoint.push_back(Point(0, 0));
@@ -291,11 +291,28 @@ void Map::searchForPath(int startingX, int startingY, int destinationX, int dest
 		const std::string currentNodeKey = std::to_string(currentNode->getPoint()->getX()) + ';' + std::to_string(currentNode->getPoint()->getY());
 		closeList.insert({ currentNodeKey, currentNode });
 		openList.erase(currentNodeKey);
-		
 
 		// Win condition
 		if (currentNode->getPoint()->getX() == destinationX && currentNode->getPoint()->getY() == destinationY)
 		{
+			fastestPathNodes = 0;
+
+			if (currentNode->getPoint()->getX() == destinationX && currentNode->getPoint()->getY() == destinationY)
+			{
+				// Mettez à jour le nombre de nœuds explorés dans le chemin le plus rapide
+				fastestPathNodes = 0;  // Réinitialisez le compteur pour le chemin le plus rapide
+
+				// Tracez le chemin et comptez les nœuds explorés
+				Node* pathNode = currentNode.get();   // Utilisez une variable temporaire
+				while (pathNode != nullptr)
+				{
+					fastestPathNodes++;
+					pathNode = pathNode->getParent();
+				}
+
+				// Inversez le chemin pour obtenir le bon ordre
+				fastestPathNodes--;
+			}
 			return drawSolution(currentNode);
 		}
 

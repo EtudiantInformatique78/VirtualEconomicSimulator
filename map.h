@@ -26,6 +26,10 @@ public:
 	void createNewPoint(int x, int y, FIELD_TYPE fieldType);
 	void searchForPath(int startingX, int startingY, int destinationX, int destinationY);
 
+	int getFastestPathNodes() const {
+		return fastestPathNodes;
+	}
+
 private:
 	int xSize;
 	int ySize;
@@ -33,6 +37,8 @@ private:
 	int greatestX;
 	int smallestY;
 	int greatestY;
+	int fastestPathNodes;
+
 	std::deque<std::deque<Point>> board;
 	/*
 	* Map storing FIELD_TYPE as key.

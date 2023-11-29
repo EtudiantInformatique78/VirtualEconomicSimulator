@@ -36,8 +36,7 @@ int main()
 	std::cout << std::endl << "----------- PERFORMANCE -----------" << std::endl << std::endl;
 	std::chrono::duration<double, std::milli> ms_double = t2 - t1;
 	std::cout << "It tooks " << ms_double.count() << "ms to find the path." << std::endl;
-
-
+	std::cout << "Number of nodes explored: " << map.getFastestPathNodes() << std::endl;
 
 	return 0;
 }
