@@ -29,9 +29,9 @@ public:
 	virtual ~TransformedMaterial() {};
 };
 
-class ConsommableGood : public Product
+class ConsumableGood : public Product
 {
 public:
-	ConsommableGood(double starting_price, std::string name) : Product(starting_price, name) {};
-	virtual ~ConsommableGood() {};
+	ConsumableGood(double starting_price, std::string name) : Product(starting_price, name) {};
+	virtual ~ConsumableGood() {};
 };
