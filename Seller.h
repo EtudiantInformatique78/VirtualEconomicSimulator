@@ -26,6 +26,8 @@ public:
 class TreeSubscriber : public Subscriber
 {
 public:
+	
+
 	void update() override
 	{
 		std::cout << "I am getting a tree ! " << std::endl;

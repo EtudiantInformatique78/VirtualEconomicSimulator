@@ -13,6 +13,12 @@ public:
 
 	virtual double getStartingPrice() = 0;
 	virtual std::string getName() = 0;
+
+	friend std::ostream& operator<<(std::ostream& out, Product& p)
+	{
+		out << p.name << " : " << p.starting_price << "$" ;
+		return out;
+	}
 };
 
 class RawMaterial : public Product

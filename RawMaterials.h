@@ -5,7 +5,7 @@ class Tree : public RawMaterial
 {
 public:
 	Tree(double starting_price, std::string name) : RawMaterial(starting_price, name) {};
-	~Tree();
+	~Tree() {};
 
 	double getStartingPrice() override
 	{
@@ -22,7 +22,7 @@ class IronOre : public RawMaterial
 {
 public:
 	IronOre(double starting_price, std::string name) : RawMaterial(starting_price, name) {};
-	~IronOre();
+	~IronOre() {};
 
 	double getStartingPrice() override
 	{

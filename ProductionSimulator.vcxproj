@@ -18,6 +18,22 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Builder.h" />
+    <ClInclude Include="Company.h" />
+    <ClInclude Include="Consumable.h" />
+    <ClInclude Include="ConsumableBuilder.h" />
+    <ClInclude Include="EventExchange.h" />
+    <ClInclude Include="Factory.h" />
+    <ClInclude Include="Product.h" />
+    <ClInclude Include="RawMaterials.h" />
+    <ClInclude Include="Seller.h" />
+    <ClInclude Include="TransformedMaterial.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="EventExchange.cpp" />
+    <ClCompile Include="ProductionSimulator.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -126,20 +142,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="ProductionSimulator.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Builder.h" />
-    <ClInclude Include="Consumable.h" />
-    <ClInclude Include="ConsumableBuilder.h" />
-    <ClInclude Include="Factory.h" />
-    <ClInclude Include="map.h" />
-    <ClInclude Include="Product.h" />
-    <ClInclude Include="RawMaterials.h" />
-    <ClInclude Include="Seller.h" />
-    <ClInclude Include="TransformedMaterial.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

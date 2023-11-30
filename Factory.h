@@ -21,7 +21,7 @@ class IronFactory : public RawMaterialFactory
 public:
 	std::shared_ptr<Product> createProduct() override
 	{
-		std::shared_ptr<IronOre> pIo = std::shared_ptr<IronOre>(new IronOre(1.1, "Iron Ore"));
+		std::shared_ptr<IronOre> pIo = std::shared_ptr<IronOre>(new IronOre(1.5, "Iron Ore"));
 		return pIo;
 	}
 };
@@ -31,7 +31,7 @@ class TreeFactory : public RawMaterialFactory
 public:
 	std::shared_ptr<Product> createProduct() override
 	{
-		std::shared_ptr<Tree> pt = std::shared_ptr<Tree>(new Tree(1.1, "Iron Ore"));
+		std::shared_ptr<Tree> pt = std::shared_ptr<Tree>(new Tree(1.1, "Tree"));
 		return pt;
 	}
 };

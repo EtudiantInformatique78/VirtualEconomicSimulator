@@ -5,7 +5,7 @@ class Iron : public TransformedMaterial
 {
 public:
 	Iron(double starting_price, std::string name) : TransformedMaterial(starting_price, name) {};
-	~Iron();
+	~Iron() {};
 
 	double getStartingPrice() override
 	{
@@ -22,7 +22,7 @@ class Wood : public TransformedMaterial
 {
 public:
 	Wood(double starting_price, std::string name) : TransformedMaterial(starting_price, name) {};
-	~Wood();
+	~Wood() {};
 
 	double getStartingPrice() override
 	{

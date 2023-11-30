@@ -3,13 +3,67 @@
 
 #include <iostream>
 #include "Seller.h"
+#include "Company.h"
+#include "EventExchange.h"
 
 
 int main()
 {
     std::cout << "Hello World!\n";
 
+    std::shared_ptr<EventSeller> es_ptr = std::shared_ptr<EventSeller>(new EventSeller());
+    std::shared_ptr<EventBuyer> eb_ptr = std::shared_ptr<EventBuyer>(new EventBuyer());
+
+    eb_ptr->subscribe(es_ptr);
+
+    eb_ptr->buy();
+    eb_ptr->buy();
+
+    eb_ptr->printProduct();
+
+    std::cout << "------------------------------------------" << std::endl;
+    eb_ptr->buy();
+
+    eb_ptr->printProduct();
+
+    /*
     
+    std::string tree_company_name = std::string("Montgomery's trees");
+    std::shared_ptr<Company> c_ptr = std::shared_ptr<TreeCompany>(new TreeCompany(tree_company_name));
+    c_ptr->produceProduct();
+    c_ptr->produceProduct();
+    c_ptr->produceProduct();
+
+    std::cout << *c_ptr.get() << std::endl;
+
+    c_ptr->printProduct();
+
+    std::shared_ptr<TreePublisher> tp_ptr = std::static_pointer_cast<TreePublisher>(
+        std::dynamic_pointer_cast<TreeCompany>(c_ptr)
+    );
+    std::string wood_company_name = std::string("Barret's trees");
+    std::shared_ptr<Company> w_ptr = std::shared_ptr<WoodCompany>(new WoodCompany(wood_company_name, tp_ptr ));
+
+    tp_ptr->notifySubscriber();
+
+
+    */
+
+    
+
+    /*
+    c_ptr = std::shared_ptr<IronCompany>(new IronCompany("Montgomery's iron ores !"));
+    c_ptr.get()->produceProduct();
+    c_ptr.get()->produceProduct();
+
+    std::cout << *c_ptr.get() << std::endl;
+    c_ptr.get()->printProduct();
+    */
+    
+
+
+
+    /*
     std::shared_ptr<Subscriber> ts1 = std::shared_ptr<TreeSubscriber>(new TreeSubscriber());
     std::shared_ptr<Subscriber> ts2 = std::shared_ptr<TreeSubscriber>(new TreeSubscriber());
     std::shared_ptr<Subscriber> ts3 = std::shared_ptr<TreeSubscriber>(new TreeSubscriber());
@@ -30,6 +84,9 @@ int main()
 
     tp_ptr->unsubscribe(ts2);
     tp_ptr->notifySubscriber();
+    */
+    
+    return 0;
 
 }
 
