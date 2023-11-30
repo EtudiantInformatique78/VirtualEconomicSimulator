@@ -133,11 +133,7 @@ void BuyerCompany::buy()
 TreeCompany::TreeCompany(std::string name) : RawMaterialCompany(name)
 {
 	this->factory = std::shared_ptr<TreeFactory>(new TreeFactory());
-	std::shared_ptr<TreeCompany> thisPointer(this, [](TreeCompany* ptr) {});
-	this->es = std::shared_ptr<EventSeller>(new EventSeller(thisPointer));
-
-	//auto sPointer = std::shared_ptr<TreeCompany>(this, [](auto) {});
-	//this->es = std::shared_ptr<EventSeller>(new EventSeller(sPointer));
+	this->es = std::shared_ptr<EventSeller>(new EventSeller(*this));
 }
 
 TreeCompany::~TreeCompany(){}
@@ -151,9 +147,7 @@ TreeCompany::~TreeCompany(){}
 WoodCompany::WoodCompany(std::string the_name) : transformedMaterialCompany(the_name)
 {
 	this->ptr_builder = std::shared_ptr<MakeWood>(new MakeWood());
-	// I need to pass this into a smart pointer
-	std::shared_ptr<WoodCompany> thisPointer(this, [](WoodCompany* ptr) {});
-	this->eb = std::shared_ptr<EventBuyer>(new EventBuyer(thisPointer));
+	this->eb = std::shared_ptr<EventBuyer>(new EventBuyer(*this));
 }
 
 void WoodCompany::subscribeToACompany(SellerCompany& sc)

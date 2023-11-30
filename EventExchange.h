@@ -8,13 +8,10 @@
 class EventCompany
 {
 protected:
-	std::shared_ptr<Company> ptrCompany;
+	Company& ptrCompany;
 
 public:
-	EventCompany(std::shared_ptr<Company> ptr_company)
-	{
-		this->ptrCompany = ptrCompany;
-	}
+	EventCompany(Company& ptr_company) : ptrCompany(ptr_company){}
 	virtual ~EventCompany() {};
 };
 
@@ -24,8 +21,7 @@ class EventSeller : public EventCompany
 {
 	
 public:
-	//EventSeller(std::shared_ptr<Company> ptr_company) : EventCompany(ptrCompany) {};
-	EventSeller(std::shared_ptr<Company> ptr_company) : EventCompany(ptr_company) {};
+	EventSeller(Company& ptr_company) : EventCompany(ptr_company) {};
 	~EventSeller() {};
 	void sellProduct(std::shared_ptr<EventBuyer> eb);
 };
@@ -38,7 +34,7 @@ private:
 
 public:
 	// Constructor
-	EventBuyer(std::shared_ptr<Company> ptr_company) : EventCompany(ptr_company)
+	EventBuyer(Company& ptr_company) : EventCompany(ptr_company)
 	{
 		vect = std::vector<std::shared_ptr<EventSeller>>();
 	}
@@ -67,7 +63,7 @@ public:
 	void buy();
 	double pay(double money)
 	{
-		return this->ptrCompany->payMoney(money);
+		return ptrCompany.payMoney(money);
 	}
 
 };
