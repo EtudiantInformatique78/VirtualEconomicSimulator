@@ -24,6 +24,7 @@ class EventSeller : public EventCompany
 {
 	
 public:
+	//EventSeller(std::shared_ptr<Company> ptr_company) : EventCompany(ptrCompany) {};
 	EventSeller(std::shared_ptr<Company> ptr_company) : EventCompany(ptrCompany) {};
 	~EventSeller() {};
 	void sellProduct(std::shared_ptr<EventBuyer> eb);
@@ -71,27 +72,3 @@ public:
 
 };
 
-/*
-#include <vector>
-#include <iostream>
-
-class Subscriber
-{
-public:
-	virtual void update() = 0;
-};
-
-class Publisher
-{
-protected:
-	std::vector<std::shared_ptr<Subscriber>> vect;
-	//std::vector<Subscriber> vectSubscriber;
-
-public:
-	virtual void subscribe(std::shared_ptr<Subscriber> s) = 0;
-	virtual void unsubscribe(std::shared_ptr<Subscriber> s) = 0;
-	virtual void notifySubscriber() = 0;
-};
-
-
-*/

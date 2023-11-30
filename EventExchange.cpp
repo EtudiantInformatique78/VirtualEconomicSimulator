@@ -43,8 +43,14 @@ void EventBuyer::subscribe(std::shared_ptr<EventSeller> s)
 
 void EventBuyer::unsubscribe(std::shared_ptr<EventSeller> s)
 {
-	std::string err = std::string("void EventBuyer::unsubscribe(std::shared_ptr<EventSeller> s) is not implemented");
-	throw err;
+	//std::string err = std::string("void EventBuyer::unsubscribe(std::shared_ptr<EventSeller> s) is not implemented");
+	//throw err;
+	std::vector<std::shared_ptr<EventSeller>>::iterator position = std::find(vect.begin(), vect.end(), s);
+	if (position != vect.end())
+	{
+		vect.erase(position);
+	}
+
 }
 
 void EventBuyer::printProduct()
