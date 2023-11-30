@@ -9,17 +9,20 @@
 
 int main()
 {	
-	Map map(1920, 1080);
-	
-	std::vector<Point> listeEntreprise;
+	srand(time(NULL));
+	Map map(500, 500);
 	
 	map.generateMapUsingPerlin();
 
-	map.createNewPoint(rand() % 1920, rand() % 1080, FIELD_TYPE::ETP);
-	map.createNewPoint(rand() % 1920, rand() % 1080, FIELD_TYPE::ETP);
-	map.createNewPoint(rand() % 1920, rand() % 1080, FIELD_TYPE::ETP);
-	map.createNewPoint(rand() % 1920, rand() % 1080, FIELD_TYPE::ETP);
-	map.createNewPoint(rand() % 1920, rand() % 1080, FIELD_TYPE::ETP);
+	for (int i = 0; i < 50; i++)
+	{
+		map.createNewPoint(rand() % 400, rand() % 400, FIELD_TYPE::OBSTACLE);
+	}
+
+	for (int i = 0; i < 5; i++)
+	{
+		map.createNewPoint(rand() % 400, rand() % 400, FIELD_TYPE::ETP);
+	}
 
 	//Point coordEntreprise(6, 10, FIELD_TYPE::ETP);
 	//Point coordEntreprise2(12, 18, FIELD_TYPE::ETP);

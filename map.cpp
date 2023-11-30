@@ -162,8 +162,17 @@ void Map::createNewPoint(int x, int y, FIELD_TYPE fieldType)
 	// If point already exists, only update type
 	if (y <= greatestY && y >= smallestY && x <= greatestX && x >= smallestX)
 	{
-		getPoint(x, y)->setFieldType(fieldType);
-		return;
+		if (getPoint(x, y)->getFieldType() == FIELD_TYPE::OBSTACLE && fieldType == FIELD_TYPE::ETP)
+		{
+			createNewPoint(x = rand() % greatestX, y = rand() % greatestY, fieldType);
+			return;
+		}
+		else
+		{
+			getPoint(x, y)->setFieldType(fieldType);
+			return;
+		}
+		
 	}
 
 	// extend map on x negative coordinates
@@ -376,7 +385,7 @@ void Map::generateMapUsingPerlin()
 	srand(time(NULL));
 	float freq1 = 1 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (5 - 1)));
 	float amp1 = 1 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (5 - 1)));
-	int roundNumber = rand() % 20 +8;
+	int roundNumber = rand() % 20 + 8;
 
 	for (int x = 0; x < board.size(); ++x)
 	{
@@ -439,6 +448,8 @@ void Map::displayMapSFML() const
 	const int tileSize = 1;  // Ajustez la taille de la tuile en pixels
 	sf::RenderWindow window(sf::VideoMode(board.size() * tileSize, board[0].size() * tileSize), "Map");
 
+	std::vector<Point> listeEntreprise;
+
 	while (window.isOpen())
 	{
 		sf::Event event;
@@ -465,6 +476,7 @@ void Map::displayMapSFML() const
 					break;
 				case FIELD_TYPE::ETP:
 					tile.setFillColor(sf::Color::Red);
+					listeEntreprise.push_back(board[x][y]);
 					break;
 				case FIELD_TYPE::GRASSLAND:
 					tile.setFillColor(sf::Color::Green);
@@ -484,6 +496,14 @@ void Map::displayMapSFML() const
 				}
 				window.draw(tile);
 			}
+			//for (int i = 0; i < listeEntreprise.size(); i++)
+			//{
+			//	for  (int j = i + 1; j < listeEntreprise.size(); j++)
+			//	{
+			//	//searchForPath(listeEntreprise[i].getX(), listeEntreprise[i].getY(), listeEntreprise[j].getX(), listeEntreprise[j].getY());
+			//	std::cout << "Number of nodes explored between: " << listeEntreprise[i].getX() <<","<< listeEntreprise[i].getY() << " and " << listeEntreprise[j].getX() << "," << listeEntreprise[j].getY() << " = " << getFastestPathNodes() << std::endl;
+			//	}
+			//}
 		}
 		window.display();
 	}
