@@ -41,6 +41,7 @@ double Company::payMoney(double price)
 	double diff = this->coin_purse - price;
 	if (diff > 0)
 	{
+		this->coin_purse = diff;
 		return price;
 	}
 	else

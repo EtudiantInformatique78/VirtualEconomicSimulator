@@ -14,15 +14,13 @@ int main()
     std::shared_ptr<Company> c_ptr = std::shared_ptr<TreeCompany>(new TreeCompany("Montgomery's trees"));
     std::shared_ptr<Company> w_ptr = std::shared_ptr<WoodCompany>(new WoodCompany("Barret's trees"));
 
-
+    c_ptr->produceProduct();
 
     std::shared_ptr<TreeCompany> dc_ptr = std::dynamic_pointer_cast<TreeCompany>(c_ptr);
     std::shared_ptr<WoodCompany> dw_ptr = std::dynamic_pointer_cast<WoodCompany>(w_ptr);
 
     dw_ptr->subscribeToACompany(*dc_ptr.get());
-    std::cout << "A\n";
     dw_ptr->buy();
-    std::cout << "B\n";
     dw_ptr->printProduct();
     std::cout << dw_ptr->getWallet() << std::endl;
 
