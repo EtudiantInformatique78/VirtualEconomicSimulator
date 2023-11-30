@@ -18,5 +18,67 @@
     <ClCompile Include="ProductionSimulator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Company.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ProductBaseInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Constants.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WorkingUnit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ProductBaseinfoBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WProduct.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MarketPlace.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Factory.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Product.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RawMaterials.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformedMaterial.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Company.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ProductBaseInfo.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Constants.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseInclusion.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WorkingUnit.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ProductBaseInfoBuilder.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WProduct.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MarketPlace.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

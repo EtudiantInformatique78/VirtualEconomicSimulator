@@ -127,7 +127,29 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Company.cpp" />
+    <ClCompile Include="Constants.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="MarketPlace.cpp" />
+    <ClCompile Include="ProductBaseInfo.cpp" />
+    <ClCompile Include="ProductBaseinfoBuilder.cpp" />
+    <ClCompile Include="WorkingUnit.cpp" />
     <ClCompile Include="ProductionSimulator.cpp" />
+    <ClCompile Include="WProduct.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BaseInclusion.h" />
+    <ClInclude Include="Company.h" />
+    <ClInclude Include="Constants.h" />
+    <ClInclude Include="Factory.h" />
+    <ClInclude Include="MarketPlace.h" />
+    <ClInclude Include="Product.h" />
+    <ClInclude Include="ProductBaseInfo.h" />
+    <ClInclude Include="ProductBaseInfoBuilder.h" />
+    <ClInclude Include="RawMaterials.h" />
+    <ClInclude Include="TransformedMaterial.h" />
+    <ClInclude Include="WorkingUnit.h" />
+    <ClInclude Include="WProduct.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
