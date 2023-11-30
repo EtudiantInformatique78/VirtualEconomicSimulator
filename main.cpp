@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <chrono>
+#include <vector>
 
 #include "map.h"
 
@@ -9,34 +10,58 @@
 
 int main()
 {
-	Map map(50, 50);
+	Map map(20, 20, FIELD_TYPE(rand()%6));
 
-	map.createNewPoint(12, 12, FIELD_TYPE::WATER);
-	map.createNewPoint(5, 4, FIELD_TYPE::TEMPEST);
-	map.createNewPoint(6, 6, FIELD_TYPE::REEF);
-	map.createNewPoint(7, 5, FIELD_TYPE::REEF);
-	map.createNewPoint(7, 6, FIELD_TYPE::OBSTACLE);
-	map.createNewPoint(7, 8, FIELD_TYPE::OBSTACLE);
-	map.createNewPoint(6, 7, FIELD_TYPE::OBSTACLE);
-	map.createNewPoint(6, 5, FIELD_TYPE::REEF);
+	std::vector<Point> listeEntreprise;
 
-	std::cout << std::endl << "-------------- LEGEND -------------" << std::endl << std::endl;
-	std::cout << ". -> water" << std::endl << "^ -> reef" << std::endl << "Z -> tempest" << std::endl << "X -> obstacle" << std::endl <<
-		"S -> starting point" << std::endl << "E -> destination point" << std::endl << "# -> path between S and E" << std::endl;
+	map.createNewPoint(6, 10, FIELD_TYPE::ETP);
+	map.createNewPoint(12, 18, FIELD_TYPE::ETP);
+	map.createNewPoint(1, 6, FIELD_TYPE::ETP);
+	map.createNewPoint(14, 5, FIELD_TYPE::ETP);
+	map.createNewPoint(9, 6, FIELD_TYPE::ETP);
 
-	std::cout << std::endl << "--------------- MAP ---------------" << std::endl << std::endl;
+	Point coordEntreprise(6, 10, FIELD_TYPE::ETP);
+	Point coordEntreprise2(12, 18, FIELD_TYPE::ETP);
+	Point coordEntreprise3(1, 6, FIELD_TYPE::ETP);
+	Point coordEntreprise4(14, 5, FIELD_TYPE::ETP);
+	Point coordEntreprise5(9, 6, FIELD_TYPE::ETP);
+	
+	listeEntreprise.push_back(coordEntreprise);
+	listeEntreprise.push_back(coordEntreprise2);
+	listeEntreprise.push_back(coordEntreprise3);
+	listeEntreprise.push_back(coordEntreprise4);
+	listeEntreprise.push_back(coordEntreprise5);
+
+	for (int i = 0; i < listeEntreprise.size(); i++)
+	{
+		for  (int j = i + 1; j < listeEntreprise.size(); j++)
+		{
+			map.searchForPath(listeEntreprise[i].getX(), listeEntreprise[i].getY(), listeEntreprise[j].getX(), listeEntreprise[j].getY());
+			std::cout << "Number of nodes explored between: " << listeEntreprise[i].getX() <<","<< listeEntreprise[i].getY() << " and " << listeEntreprise[j].getX() << "," << listeEntreprise[j].getY() << " = " << map.getFastestPathNodes() << std::endl;
+		}
+	}
+
 	map.displayMap();
 
-	std::cout << std::endl << "----------- PATHFINDING -----------" << std::endl << std::endl;
-	auto t1 = std::chrono::high_resolution_clock::now();
-	map.searchForPath(0, 6, 7, 7);
-	auto t2 = std::chrono::high_resolution_clock::now();
-	
+	//std::cout << std::endl << "----------- PATHFINDING -----------" << std::endl << std::endl;
+	//map.searchForPath(0, 0, 48, 42);
 
-	std::cout << std::endl << "----------- PERFORMANCE -----------" << std::endl << std::endl;
-	std::chrono::duration<double, std::milli> ms_double = t2 - t1;
-	std::cout << "It tooks " << ms_double.count() << "ms to find the path." << std::endl;
-	std::cout << "Number of nodes explored: " << map.getFastestPathNodes() << std::endl;
+	//std::cout << "Number of nodes explored: " << map.getFastestPathNodes() << std::endl;
+
+
+
+
+
+
+
+
+	//auto t1 = std::chrono::high_resolution_clock::now();
+	//auto t2 = std::chrono::high_resolution_clock::now();
+
+	//std::cout << std::endl << "----------- PERFORMANCE -----------" << std::endl << std::endl;
+	//std::chrono::duration<double, std::milli> ms_double = t2 - t1;
+	//std::cout << "It tooks " << ms_double.count() << "ms to find the path." << std::endl;
+	
 
 	return 0;
 }
