@@ -1,8 +1,9 @@
-#include "BaseInclusion.h"
-#include "ProductBaseInfoBuilder.h"
-#include "ProductBaseInfo.h"
+#include "WBaseInclusion.h"
+#include "WProductBaseInfoBuilder.h"
+#include "WProductBaseInfo.h"
 #include "WProduct.h"
-#include "Company.h"
+#include "WCompany.h"
+#include "WMarketPlace.h"
 
 
 int main()
