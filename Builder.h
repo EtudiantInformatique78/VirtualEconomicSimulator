@@ -10,31 +10,36 @@
 
 class IBuilder
 {
+protected:
+	std::shared_ptr<Product> result;
+
 public:
 	virtual ~IBuilder() {};
 	virtual void reset() = 0;
-	virtual void Build(std::vector<Product> vect) = 0;
-	virtual std::shared_ptr<Product> getResult() = 0;
+	virtual void Build(std::vector<std::shared_ptr<Product>> vect) = 0;
+	std::shared_ptr<Product> getResult()
+	{
+		return result;
+	}
 };
 
 class MakeWood : public IBuilder
 {
-private:
-	std::shared_ptr<Product> result;
+public:
+	MakeWood() : IBuilder() {};
+	~MakeWood() {};
 
 	void reset() override
 	{
 	}
-	void Build(std::vector<Product> vect) override
+	void Build(std::vector<std::shared_ptr<Product>> vect) override
 	{
 		if(!vect.empty())
 		{
-			
-			if(dynamic_cast<Tree*>(  &vect.back()) != nullptr)
-			{
-				vect.pop_back();
-				result = std::shared_ptr<Wood>(new Wood(1.2, "Wood"));
-			}
+			//std::shared_ptr<Tree> tree_ptr = std::dynamic_pointer_cast<Tree>(vect.back());
+			std::cout << "Line : " << __LINE__ << "Don't forget to ensure that we only use Tree" << std::endl;
+			vect.pop_back();
+			result = std::shared_ptr<Wood>(new Wood(1.2, "Wood"));
 
 		}
 		else
@@ -44,41 +49,29 @@ private:
 		
 	}
 
-	std::shared_ptr<Product> getResult() override
-	{
-		return result;
-	}
 
 };
 
 class MakeIron : public IBuilder
 {
-private:
-	std::shared_ptr<Product> result;
-
+public:
 	void reset() override
 	{
 	}
-	void Build(std::vector<Product> vect) override
+	void Build(std::vector<std::shared_ptr<Product>> vect) override
 	{
 		if (!vect.empty())
 		{
-			if (dynamic_cast<Iron*>(&vect.back()) != nullptr)
-			{
-				vect.pop_back();
-				result = std::shared_ptr<Iron>(new Iron(1.5, "Iron"));
-			}
+			std::cout << "Line : " << __LINE__ << "Don't forget to ensure that we only use Iron ore" << std::endl;
+			vect.pop_back();
+			result = std::shared_ptr<Iron>(new Iron(1.5, "Iron"));
+			
 		}
 		else
 		{
 
 		}
 
-	}
-
-	std::shared_ptr<Product> getResult() override
-	{
-		return result;
 	}
 
 };

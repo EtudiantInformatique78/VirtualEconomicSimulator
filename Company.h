@@ -151,5 +151,7 @@ public:
 		/*
 		I try to figure out
 		*/
+		ptr_builder->Build(stockInit);
+		ptr_builder->getResult();
 	}
 };
