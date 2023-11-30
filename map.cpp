@@ -1,10 +1,13 @@
 #include "map.h"
+#include "SFML/Graphics.hpp"
 
 Map::Map(int _xSize, int _ySize) : fastestPathNodes(0)
 {
 	std::deque<Point> initialPoint;
 	initialPoint.push_back(Point(0, 0));
 	board.push_back(initialPoint);
+
+	generateMapUsingPerlin();
 
 	smallestX = 0;
 	greatestX = 0;
@@ -21,11 +24,14 @@ Map::Map(int _xSize, int _ySize) : fastestPathNodes(0)
 	}
 
 	//Initialise fieldTypeInformations
-	fieldTypeInformations = {
+	fieldTypeInformations = 
+	{
 		{ FIELD_TYPE::OBSTACLE, std::make_pair<char, double>('X', 0) },
-		{ FIELD_TYPE::REEF    , std::make_pair<char, double>('^', 2) },
-		{ FIELD_TYPE::TEMPEST , std::make_pair<char, double>('Z', 1.5) },
-		{ FIELD_TYPE::WATER   , std::make_pair<char, double>('.', 1) }
+		{ FIELD_TYPE::ETP    , std::make_pair<char, double>('O', 1.2) },
+		{ FIELD_TYPE::GRASSLAND , std::make_pair<char, double>('.', 1) },
+		{ FIELD_TYPE::WATER   , std::make_pair<char, double>('w', 1.8) },
+		{ FIELD_TYPE::MOUNTAIN   , std::make_pair<char, double>('^', 2) },
+		{ FIELD_TYPE::FOREST   , std::make_pair<char, double>('T', 1.5) }
 	};
 }
 
@@ -74,21 +80,6 @@ void Map::drawSolution(std::shared_ptr<Node> finalNode) const
 				std::cout << "#";
 				continue;
 			}
-			std::cout << fieldTypeInformations.at(cell.getFieldType()).first;
-		}
-		std::cout << std::endl;
-	}
-	double distanceLastFirst = getDistanceBetweenTwoPoint(finalNode->getPoint()->getX(), finalNode->getPoint()->getY(), firstNode->getPoint()->getX(), firstNode->getPoint()->getY());
-	std::cout << distanceLastFirst << std::endl;
-}
-
-// Display the map
-void Map::displayMap() const
-{
-	for (const auto& line : board)
-	{
-		for (const auto& cell : line)
-		{
 			std::cout << fieldTypeInformations.at(cell.getFieldType()).first;
 		}
 		std::cout << std::endl;
@@ -237,7 +228,8 @@ Node* Map::getFirstNode(Node* finalNode) const
 std::shared_ptr<Node> Map::getLowestFCostIndex(const std::unordered_map<std::string, std::shared_ptr<Node>>& list) const
 {
 	std::shared_ptr<Node> smallestCost = list.begin()->second;
-	for (auto it = list.begin(); it != list.end(); it++) {
+	for (auto it = list.begin(); it != list.end(); it++) 
+	{
 		if (smallestCost->getFCost() > it->second->getFCost())
 		{
 			smallestCost = it->second;
@@ -313,11 +305,11 @@ void Map::searchForPath(int startingX, int startingY, int destinationX, int dest
 				// Inversez le chemin pour obtenir le bon ordre
 				fastestPathNodes--;
 			}
-			return drawSolution(currentNode);
 		}
 
 		// Get all the 8 adjacentes nodes
-		std::vector<Node> adjacentNodes = {
+		std::vector<Node> adjacentNodes = 
+		{
 			Node(getPoint(currentNode->getPoint()->getX()    , currentNode->getPoint()->getY() + 1)),
 			Node(getPoint(currentNode->getPoint()->getX() + 1, currentNode->getPoint()->getY() + 1)),
 			Node(getPoint(currentNode->getPoint()->getX() + 1, currentNode->getPoint()->getY())),
@@ -376,5 +368,123 @@ void Map::searchForPath(int startingX, int startingY, int destinationX, int dest
 			openList.insert({ std::to_string(node->getPoint()->getX()) + ';' + std::to_string(node->getPoint()->getY()) , node });
 
 		}
+	}
+}
+
+void Map::generateMapUsingPerlin()
+{
+	srand(time(NULL));
+	float freq1 = 1 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (5 - 1)));
+	float amp1 = 1 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (5 - 1)));
+	int roundNumber = rand() % 20 +8;
+
+	for (int x = 0; x < board.size(); ++x)
+	{
+		for (int y = 0; y < board[x].size(); ++y)
+		{
+			float perlinValue = 0;
+
+			float freq = freq1;
+			float amp = amp1;
+
+			for (int i = 0; i < roundNumber; i++)
+			{
+				perlinValue += perlin(x * freq / board.size(),y * freq / board.size()) * amp;
+
+				freq *= 2;
+				amp /= 2;
+
+			}
+			// Contrast
+			perlinValue *= 1.2;
+
+			// Clipping
+			if (perlinValue > 1.0f)
+				perlinValue = 1.0f;
+			else if (perlinValue < -1.0f)
+				perlinValue = -1.0f;
+
+			int color = (int)(((perlinValue + 1.0f) * 0.5f) * 255);
+
+			// Remappez la valeur de Perlin à la plage de vos types de terrain
+			if (color < 20)
+			{
+				createNewPoint(x, y, FIELD_TYPE::OBSTACLE);
+			}
+			else if (color >= 20 && color < 80)
+			{
+				createNewPoint(x, y, FIELD_TYPE::WATER);
+			}
+			else if (color >= 80 && color < 95)
+			{
+				createNewPoint(x, y, FIELD_TYPE::BEACH);
+			}
+			else if (color >= 95 && color < 160)
+			{
+				createNewPoint(x, y, FIELD_TYPE::GRASSLAND);
+			}
+			else if (color >= 160 && color < 200)
+			{
+				createNewPoint(x, y, FIELD_TYPE::FOREST);
+			}
+			else if (color >= 220 && color < 255)
+			{
+				createNewPoint(x, y, FIELD_TYPE::MOUNTAIN);
+			}
+		}
+	}
+}
+void Map::displayMapSFML() const
+{
+	const int tileSize = 1;  // Ajustez la taille de la tuile en pixels
+	sf::RenderWindow window(sf::VideoMode(board.size() * tileSize, board[0].size() * tileSize), "Map");
+
+	while (window.isOpen())
+	{
+		sf::Event event;
+		while (window.pollEvent(event))
+		{
+			if (event.type == sf::Event::Closed)
+				window.close();
+		}
+
+		window.clear();
+
+		for (int x = 0; x < board.size(); ++x)
+		{
+			for (int y = 0; y < board[x].size(); ++y)
+			{
+				sf::RectangleShape tile(sf::Vector2f(tileSize, tileSize));
+				tile.setPosition(x * tileSize, y * tileSize);
+
+				// Couleur en fonction du type de terrain
+				switch (board[x][y].getFieldType())
+				{
+				case FIELD_TYPE::OBSTACLE:
+					tile.setFillColor(sf::Color::Black);
+					break;
+				case FIELD_TYPE::ETP:
+					tile.setFillColor(sf::Color::Red);
+					break;
+				case FIELD_TYPE::GRASSLAND:
+					tile.setFillColor(sf::Color::Green);
+					break;
+				case FIELD_TYPE::WATER:
+					tile.setFillColor(sf::Color::Blue);
+					break;
+				case FIELD_TYPE::BEACH:
+					tile.setFillColor(sf::Color::Yellow);
+					break;
+				case FIELD_TYPE::MOUNTAIN:
+					tile.setFillColor(sf::Color(102, 51, 0));  // Brown color for mountains
+					break;
+				case FIELD_TYPE::FOREST:
+					tile.setFillColor(sf::Color(51, 102, 0)); // Dark green for forest
+					break;
+				}
+				window.draw(tile);
+			}
+		}
+		window.display();
 	}
 }

@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <string>
 #include <map>
-
+#include "perlin.h"
 #include "point.h"
 #include "node.h"
 
@@ -22,9 +22,10 @@ public:
 	Map(int _xSize, int _ySize);
 	~Map();
 
-	void displayMap() const;
 	void createNewPoint(int x, int y, FIELD_TYPE fieldType);
 	void searchForPath(int startingX, int startingY, int destinationX, int destinationY);
+	void generateMapUsingPerlin();
+	void displayMapSFML() const;
 
 	int getFastestPathNodes() const {
 		return fastestPathNodes;
@@ -38,7 +39,7 @@ private:
 	int smallestY;
 	int greatestY;
 	int fastestPathNodes;
-
+	
 	std::deque<std::deque<Point>> board;
 	/*
 	* Map storing FIELD_TYPE as key.

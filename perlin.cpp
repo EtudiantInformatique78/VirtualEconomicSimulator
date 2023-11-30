@@ -2,14 +2,18 @@
 #include <math.h>
 #include "SFML/Graphics.hpp"
 
+#include "map.h"
+
 #include "perlin.h"
 
 
-vector2 randomGradient(int ix, int iy) {
+vector2 randomGradient(int ix, int iy) 
+{
     // No precomputed gradients mean this works for any number of grid coordinates
     const unsigned w = 8 * sizeof(unsigned);
     const unsigned s = w / 2;
     unsigned a = ix, b = iy;
+
     a *= 3284157443;
 
     b ^= a << s | a >> w - s;
@@ -28,7 +32,8 @@ vector2 randomGradient(int ix, int iy) {
 }
 
 // Computes the dot product of the distance and gradient vectors.
-float dotGridGradient(int ix, int iy, float x, float y) {
+float dotGridGradient(int ix, int iy, float x, float y) 
+{
     // Get gradient from integer coordinates
     vector2 gradient = randomGradient(ix, iy);
 
@@ -73,123 +78,4 @@ float perlin(float x, float y) {
     float value = interpolate(ix0, ix1, sy);
 
     return value;
-}
-
-void utiliserPerlin()
-{
-    const int windowWidth = 1920;
-    const int windowHeight = 1080;
-
-    sf::RenderWindow window(sf::VideoMode(windowWidth, windowHeight, 32), "Perlin");
-
-    sf::Uint8* pixels = new sf::Uint8[windowWidth * windowHeight * 4];
-
-
-    const int GRID_SIZE = 400;
-
-
-    for (int x = 0; x < windowWidth; x++)
-    {
-        for (int y = 0; y < windowHeight; y++)
-        {
-            int index = (y * windowWidth + x) * 4;
-
-
-            float val = 0;
-
-            float freq = 1;
-            float amp = 1;
-
-            for (int i = 0; i < 12; i++)
-            {
-                val += perlin(x * freq / GRID_SIZE, y * freq / GRID_SIZE) * amp;
-
-                freq *= 2;
-                amp /= 2;
-
-            }
-
-            // Contrast
-            val *= 1.2;
-
-            // Clipping
-            if (val > 1.0f)
-                val = 1.0f;
-            else if (val < -1.0f)
-                val = -1.0f;
-
-            // Convert 1 to -1 into 255 to 0
-            int color = (int)(((val + 1.0f) * 0.5f) * 255);
-
-            // Set pixel color
-            if (color < 80)
-            {
-                pixels[index] = 0;
-                pixels[index + 1] = 255;
-                pixels[index + 2] = 255;
-                pixels[index + 3] = 255;
-            }
-            if (color >= 80 && color <95)
-            {
-                pixels[index] = 204;
-                pixels[index + 1] = 204;
-                pixels[index + 2] = 0;
-                pixels[index + 3] = 255;
-            }
-            if (color >= 95 && color < 160)
-            {
-                pixels[index] = 0;
-                pixels[index + 1] = 153;
-                pixels[index + 2] = 0;
-                pixels[index + 3] = 255;
-            }
-            if (color >= 160 && color < 175)
-            {
-                pixels[index] = 00;
-                pixels[index + 1] = 102;
-                pixels[index + 2] = 0;
-                pixels[index + 3] = 255;
-            }
-            if (color >= 175 && color < 200)
-            {
-                pixels[index] = 102;
-                pixels[index + 1] = 51;
-                pixels[index + 2] = 0;
-                pixels[index + 3] = 255;
-            }
-            if (color >= 200 && color <= 255)
-            {
-                pixels[index] = 0;
-                pixels[index + 1] = 0;
-                pixels[index + 2] = 0;
-                pixels[index + 3] = 255;
-            }
-            
-           
-        }
-    }
-
-    sf::Texture texture;
-    sf::Sprite sprite;
-
-    texture.create(windowWidth, windowHeight);
-
-    texture.update(pixels);
-
-    sprite.setTexture(texture);
-
-    while (window.isOpen())
-    {
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed)
-                window.close();
-        }
-
-        window.clear();
-        window.draw(sprite);
-
-        window.display();
-    }
 }

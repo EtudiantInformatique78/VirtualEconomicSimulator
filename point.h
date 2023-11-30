@@ -2,16 +2,19 @@
 
 enum class FIELD_TYPE
 {
-	WATER,
+	ETP,
 	OBSTACLE,
-	TEMPEST,
-	REEF
+	WATER,
+	GRASSLAND,
+	FOREST,
+	MOUNTAIN,
+	BEACH
 };
 
 class Point
 {
 public:
-	Point(int _x, int _y, FIELD_TYPE _type = FIELD_TYPE::WATER);
+	Point(int _x, int _y, FIELD_TYPE _type = FIELD_TYPE::GRASSLAND);
 	~Point();
 	const int& getX() const;
 	const int& getY() const;
