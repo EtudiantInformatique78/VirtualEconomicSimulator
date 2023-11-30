@@ -35,7 +35,7 @@ private:
 
 public:
 	// Constructor
-	EventBuyer(std::shared_ptr<Company> ptr_company) : EventCompany(ptrCompany)
+	EventBuyer(Company& ptr_company) : EventCompany(ptr_company)
 	{
 		vect = std::vector<std::shared_ptr<EventSeller>>();
 	}

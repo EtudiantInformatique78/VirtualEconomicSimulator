@@ -4,7 +4,7 @@
 void EventSeller::sellProduct(std::shared_ptr<EventBuyer> eb)
 {
 	// ask buyer for money
-	std::shared_ptr<Product> ptr_product = this->ptrCompany->getProduct();
+	std::shared_ptr<Product> ptr_product = this->ptrCompany.getProduct();
 	if(ptr_product != nullptr)
 	{
 		double starting_price = ptr_product->getStartingPrice();
@@ -14,9 +14,9 @@ void EventSeller::sellProduct(std::shared_ptr<EventBuyer> eb)
 		// If it has money, push element to vect
 		if (money == starting_price)
 		{
-			double coin_purse = this->ptrCompany->getWallet();
+			double coin_purse = this->ptrCompany.getWallet();
 			coin_purse += money;
-			this->ptrCompany->setWallet(coin_purse);
+			this->ptrCompany.setWallet(coin_purse);
 
 
 			eb->push_back(ptr_product);
@@ -56,7 +56,7 @@ void EventBuyer::unsubscribe(std::shared_ptr<EventSeller> s)
 void EventBuyer::printProduct()
 {
 	std::vector<std::shared_ptr<Product>>::iterator it;
-	std::vector<std::shared_ptr<Product>> vectProd = this->ptrCompany->getProducts();
+	std::vector<std::shared_ptr<Product>> vectProd = this->ptrCompany.getProducts();
 	for (it = vectProd.begin(); it != vectProd.end(); ++it)
 	{
 		std::cout << *((*it).get()) << std::endl;
@@ -66,14 +66,14 @@ void EventBuyer::printProduct()
 
 std::vector<std::shared_ptr<Product>> EventBuyer::getProduct()
 {
-	return this->ptrCompany->getProducts();
+	return this->ptrCompany.getProducts();
 }
 
 
 
 void EventBuyer::push_back(std::shared_ptr<Product> p_ptr)
 {	
-	this->ptrCompany->push_back_stock(p_ptr);
+	this->ptrCompany.push_back_stock(p_ptr);
 }
 
 void EventBuyer::buy()
