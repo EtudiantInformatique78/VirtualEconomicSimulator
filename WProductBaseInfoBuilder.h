@@ -16,7 +16,7 @@ public:
 	/// <summary>
 	/// Per kms
 	/// </summary>
-	float transportationCost;
+	float transportationCostPerkm;
 
 	WProductBaseInfoBuilder();
 	~WProductBaseInfoBuilder();
