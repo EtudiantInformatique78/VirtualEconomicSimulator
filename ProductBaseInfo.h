@@ -21,6 +21,6 @@ public:
 
 	vector<map<shared_ptr<ProductBaseInfo>, int>> composition;
 
-	ProductBaseInfo(ProductBaseInfoBuilder builder);
+	ProductBaseInfo(int _id, ProductBaseInfoBuilder _builder);
 	~ProductBaseInfo();
 };

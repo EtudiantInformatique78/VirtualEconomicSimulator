@@ -1,16 +1,20 @@
 #pragma once
 
 
+class Company;
+
 class WProduct
 {
 private:
-	float price;
+	
 	int quantity;
 	shared_ptr<Company> company;
 
 public:
 
-	WProduct(float price, int quantity);
+	const float price;
+
+	WProduct(float _price, int _quantity, shared_ptr<Company> company);
 	~WProduct();
 
 	float GetPrice();

@@ -8,6 +8,6 @@ private:
 
 
 public:
-	WorkingUnit();
+	WorkingUnit(int nbEmploye, vector<WProduct> rawStocks);
 	~WorkingUnit();
 };

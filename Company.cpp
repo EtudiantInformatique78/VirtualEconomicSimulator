@@ -1,11 +1,10 @@
 #include "BaseInclusion.h"
-#include "Company.h"
+
+#include "ProductBaseInfoBuilder.h"
 #include "ProductBaseInfo.h"
-#include "Constants.h"
 #include "WProduct.h"
-
-
-using namespace std;
+#include "Company.h"
+#include "Constants.h"
 
 Company::Company(shared_ptr<ProductBaseInfo> _productBaseInfo, pair<int,int> _position)
 {

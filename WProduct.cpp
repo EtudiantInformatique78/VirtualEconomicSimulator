@@ -1,13 +1,11 @@
+#include "BaseInclusion.h"
 #include <iostream>
 #include "WProduct.h"
-#include "Company.h"
 
-using namespace std;
-
-WProduct::WProduct(float _price, int _quantity)
+WProduct::WProduct(float _price, int _quantity, shared_ptr<Company> _company) : price(_price)
 {
-	price = _price;
 	quantity = _quantity;
+	company = _company;
 }
 
 WProduct::~WProduct()
