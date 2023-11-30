@@ -1,4 +1,10 @@
 #pragma once
+#include "WBaseInclusion.h"
+#include "WProductBaseInfoBuilder.h"
+#include "WProductBaseInfo.h"
+#include "WPurchasingWish.h"
+#include "WProduct.h"
+#include "WConstants.h"
 
 class WProduct;
 
@@ -12,7 +18,7 @@ private:
 	float salaryEmploye;
 
 	int rAndDLevel;
-	pair<int, int> position;
+	
 	map<shared_ptr<WCompany>, float> distanceFromCompany;
 
 	float margin;
@@ -24,6 +30,8 @@ private:
 
 
 public:
+	pair<int, int> position;
+
 	WCompany(shared_ptr<WProductBaseInfo> _productBaseInfo, pair<int, int> _position);
 	~WCompany();
 
@@ -37,4 +45,7 @@ public:
 
 	void ApplyWorkDay();
 	void ReceiveMoney(float amount);
+
+	float GetDistanceFrom(shared_ptr<WCompany> company);
+
 };

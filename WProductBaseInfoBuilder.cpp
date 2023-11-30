@@ -1,4 +1,3 @@
-#include "WBaseInclusion.h"
 #include "WProductBaseInfoBuilder.h"
 
 
@@ -10,7 +9,7 @@ WProductBaseInfoBuilder::WProductBaseInfoBuilder()
 	baseMargin = -1;
 	employeDayUnit = -1;
 	fabricationCost = -1;
-	transportationCost = -1;
+	transportationCostPerkm = -1;
 }
 
 

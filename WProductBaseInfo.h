@@ -1,5 +1,6 @@
 #pragma once
-
+#include "WBaseInclusion.h"
+#include "WProductBaseInfoBuilder.h"
 
 class WProductBaseInfo
 {
@@ -20,7 +21,7 @@ public:
 	/// <summary>
 	/// Per kms
 	/// </summary>
-	const float transportationCost;
+	const float transportationCostPerKm;
 
 	map<shared_ptr<WProductBaseInfo>, int> composition;
 

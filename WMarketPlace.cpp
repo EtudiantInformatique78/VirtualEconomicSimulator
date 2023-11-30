@@ -1,12 +1,6 @@
-#include "WBaseInclusion.h"
-#include "WProductBaseInfo.h"
-#include "WPurchasingWish.h"
-#include "WCompany.h"
 #include "WMarketPlace.h"
-#include "WProduct.h"
-#include "WConstants.h"
 
-WMarketPlace::WMarketPlace()
+WMarketPlace::WMarketPlace(shared_ptr<WEconomy> _economy) : economy(_economy)
 {
 
 }
@@ -18,12 +12,14 @@ WMarketPlace::~WMarketPlace()
 
 void WMarketPlace::Add(shared_ptr<WCompany> newCompany)
 {
+	auto companies = economy->GetCompanies();
 	companies.push_back(newCompany);
 }
 
 
 void WMarketPlace::Remove(shared_ptr<WCompany> companyToremove)
 {
+	auto companies = economy->GetCompanies();
 	companies.remove(companyToremove);
 }
 
@@ -46,6 +42,7 @@ void WMarketPlace::AddToMarket(shared_ptr<WProductBaseInfo> productBaseInfo, lis
 
 void WMarketPlace::RetrieveEndProductsStocks()
 {
+	auto companies = economy->GetCompanies();
 	marketStocks.clear();
 
 	// Add all end products of each company to the market
@@ -76,6 +73,7 @@ void WMarketPlace::AddPurchasingWishesCompany(shared_ptr<list<shared_ptr<WPurcha
 
 void WMarketPlace::RetrievePurchasingWishes()
 {
+	auto companies = economy->GetCompanies();
 	purchasingWishesByProducts.clear();
 
 	for (shared_ptr<WCompany> const company : companies)
@@ -179,7 +177,80 @@ void WMarketPlace::CalculateNewProductsRates()
 	}
 }
 
+pair<shared_ptr<WProduct>, float> WMarketPlace::GetCheapestProduct(shared_ptr<WPurchasingWish> purchasingWish, list<shared_ptr<WProduct>>& marketStock)
+{
+	shared_ptr<WProductBaseInfo> productBaseInfo = purchasingWish->product;
+	shared_ptr<WCompany> companyThatPurchase = purchasingWish->company;
+
+	shared_ptr<WProduct> cheapestProduct = nullptr;
+	float cheapestPrice = numeric_limits<float>::max();
+
+	for (shared_ptr<WProduct> product : marketStock)
+	{
+		float distanceBetweenCompanies = companyThatPurchase->GetDistanceFrom(product->company);
+
+		float price = productBaseInfo->GetFloatingPrice() + distanceBetweenCompanies * productBaseInfo->transportationCostPerKm + product->deltaCompanyPrice;
+
+		if (price > cheapestPrice)
+			continue;
+
+		cheapestPrice = price;
+		cheapestProduct = product;
+	}
+
+	return pair<shared_ptr<WProduct>, float>(cheapestProduct, cheapestPrice);
+}
+
+
+void WMarketPlace::SelectCompanyDealsByProduct(shared_ptr<WProductBaseInfo> productBaseInfo, list<shared_ptr<WPurchasingWish>> purchasingWishes)
+{
+	float basePrice = productBaseInfo->GetFloatingPrice();
+	float transportationCostPerKm = productBaseInfo->transportationCostPerKm;
+
+	list<shared_ptr<WProduct>> marketStock = marketStocks[productBaseInfo];
+	
+	random_device rd;
+	mt19937 gen(rd());
+	uniform_int_distribution<>distrib(0, purchasingWishes.size() - 1);
+
+	shared_ptr<WPurchasingWish> selectedPurchasingWish = *next(purchasingWishes.begin(), distrib(gen));
+
+	pair<shared_ptr<WProduct>, float> buyingProduct = GetCheapestProduct(selectedPurchasingWish, marketStock);
+
+	shared_ptr<WProduct> product = buyingProduct.first;
+
+	shared_ptr<WCompany> buyingCompany = selectedPurchasingWish->company;
+	shared_ptr<WCompany> sellingCompany = product->company;
+
+	float buyingPrice = buyingProduct.second;
+
+	int quantityProduct = product->GetQuantity();
+	int quantityWishes = selectedPurchasingWish->quantity;
+
+	if (quantityWishes > quantityProduct)
+	{
+		purchasingWishes.remove(selectedPurchasingWish);
+
+
+		
+	}
+
+
+
+}
+
+
 void WMarketPlace::SelectCompanyDeals()
 {
+	// for each product
+	for (pair<shared_ptr<WProductBaseInfo>, list<shared_ptr<WPurchasingWish>>> purchasingWishesByProduct : purchasingWishesByProducts)
+	{
+		shared_ptr<WProductBaseInfo> productBaseInfo = purchasingWishesByProduct.first;
 
+		if (!marketStocks.count(productBaseInfo))
+			continue;
+
+		list<shared_ptr<WPurchasingWish>> purchasingWishes = purchasingWishesByProduct.second;
+		SelectCompanyDealsByProduct(productBaseInfo, purchasingWishes);
+	}
 }

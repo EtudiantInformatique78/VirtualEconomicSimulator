@@ -1,5 +1,6 @@
 #pragma once
-
+#include "WBaseInclusion.h"
+#include "WProduct.h"
 
 class WorkingUnit
 {

@@ -1,7 +1,7 @@
 #pragma once
+#include "WBaseInclusion.h"
 
-
-class ProductBaseInfoBuilder
+class WProductBaseInfoBuilder
 {
 public:
 	string name;
@@ -18,6 +18,6 @@ public:
 	/// </summary>
 	float transportationCost;
 
-	ProductBaseInfoBuilder();
-	~ProductBaseInfoBuilder();
+	WProductBaseInfoBuilder();
+	~WProductBaseInfoBuilder();
 };

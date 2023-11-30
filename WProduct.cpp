@@ -1,5 +1,3 @@
-#include "WBaseInclusion.h"
-#include <iostream>
 #include "WProduct.h"
 
 WProduct::WProduct(float _price, int _quantity, shared_ptr<WCompany> _company) : price(_price), company(_company)

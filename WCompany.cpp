@@ -1,11 +1,4 @@
-#include "WBaseInclusion.h"
-
-#include "WProductBaseInfoBuilder.h"
-#include "WProductBaseInfo.h"
-#include "WPurchasingWish.h"
-#include "WProduct.h"
 #include "WCompany.h"
-#include "WConstants.h"
 
 WCompany::WCompany(shared_ptr<WProductBaseInfo> _productBaseInfo, pair<int,int> _position)
 {
@@ -26,7 +19,7 @@ WCompany::~WCompany()
 
 void WCompany::ApplyWorkDay()
 {
-
+	// TODO : ApplyWorkDay
 }
 
 list<shared_ptr<WProduct>> WCompany::GetEndProductStock()
@@ -78,4 +71,14 @@ shared_ptr<list<shared_ptr<WPurchasingWish>>> WCompany::GetPurchasingWishes(shar
 void WCompany::ReceiveMoney(float amount)
 {
 	capital += amount;
+}
+
+float WCompany::GetDistanceFrom(shared_ptr<WCompany> company)
+{
+	if (distanceFromCompany.count(company))
+		return distanceFromCompany[company];
+
+	// Calculate the distance and save it in distanceFromCompany
+
+	return 5.0f;
 }

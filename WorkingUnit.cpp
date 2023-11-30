@@ -1,5 +1,3 @@
-#include "WBaseInclusion.h"
-#include "WProduct.h"
 #include "WorkingUnit.h"
 
 
