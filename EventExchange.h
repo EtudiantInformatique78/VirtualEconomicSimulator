@@ -25,7 +25,7 @@ class EventSeller : public EventCompany
 	
 public:
 	//EventSeller(std::shared_ptr<Company> ptr_company) : EventCompany(ptrCompany) {};
-	EventSeller(std::shared_ptr<Company> ptr_company) : EventCompany(ptrCompany) {};
+	EventSeller(std::shared_ptr<Company> ptr_company) : EventCompany(ptr_company) {};
 	~EventSeller() {};
 	void sellProduct(std::shared_ptr<EventBuyer> eb);
 };
@@ -38,7 +38,7 @@ private:
 
 public:
 	// Constructor
-	EventBuyer(std::shared_ptr<Company> ptr_company) : EventCompany(ptrCompany)
+	EventBuyer(std::shared_ptr<Company> ptr_company) : EventCompany(ptr_company)
 	{
 		vect = std::vector<std::shared_ptr<EventSeller>>();
 	}

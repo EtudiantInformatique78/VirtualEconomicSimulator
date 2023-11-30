@@ -133,11 +133,11 @@ void BuyerCompany::buy()
 TreeCompany::TreeCompany(std::string name) : RawMaterialCompany(name)
 {
 	this->factory = std::shared_ptr<TreeFactory>(new TreeFactory());
-	//std::shared_ptr<TreeCompany> thisPointer(this, [](TreeCompany* ptr) {});
-	//this->es = std::shared_ptr<EventSeller>(new EventSeller(thisPointer));
+	std::shared_ptr<TreeCompany> thisPointer(this, [](TreeCompany* ptr) {});
+	this->es = std::shared_ptr<EventSeller>(new EventSeller(thisPointer));
 
-	auto sPointer = std::shared_ptr<TreeCompany>(this, [](auto) {});
-	this->es = std::shared_ptr<EventSeller>(new EventSeller(sPointer));
+	//auto sPointer = std::shared_ptr<TreeCompany>(this, [](auto) {});
+	//this->es = std::shared_ptr<EventSeller>(new EventSeller(sPointer));
 }
 
 TreeCompany::~TreeCompany(){}
