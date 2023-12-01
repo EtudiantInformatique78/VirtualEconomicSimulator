@@ -27,11 +27,13 @@ Map::Map(int _xSize, int _ySize) : fastestPathNodes(0)
 	fieldTypeInformations = 
 	{
 		{ FIELD_TYPE::OBSTACLE, std::make_pair<char, double>('X', 0) },
-		{ FIELD_TYPE::ETP    , std::make_pair<char, double>('O', 1.2) },
-		{ FIELD_TYPE::GRASSLAND , std::make_pair<char, double>('.', 1) },
-		{ FIELD_TYPE::WATER   , std::make_pair<char, double>('w', 1.8) },
-		{ FIELD_TYPE::MOUNTAIN   , std::make_pair<char, double>('^', 2) },
-		{ FIELD_TYPE::FOREST   , std::make_pair<char, double>('T', 1.5) }
+		{ FIELD_TYPE::ETP    , std::make_pair<char, double>('O', 1) },
+		{ FIELD_TYPE::GRASSLAND , std::make_pair<char, double>('.', 1.1) },
+		{ FIELD_TYPE::WATER   , std::make_pair<char, double>('w', 1.5) },
+		{ FIELD_TYPE::MOUNTAIN   , std::make_pair<char, double>('^', 1.4) },
+		{ FIELD_TYPE::FOREST   , std::make_pair<char, double>('T', 1.3) },
+		{ FIELD_TYPE::BEACH   , std::make_pair<char, double>('T', 1.2) },
+		{ FIELD_TYPE::PATH   , std::make_pair<char, double>('T', 1) }
 	};
 }
 
@@ -51,39 +53,6 @@ bool Map::isInPath(Node* finalNode, const Point& cell) const
 		finalNode = finalNode->getParent();
 	}
 	return false;
-}
-
-// Display the map and the path found
-void Map::drawSolution(std::shared_ptr<Node> finalNode) const
-{
-	Node* firstNode = getFirstNode(finalNode.get());
-	for (const auto& line : board)
-	{
-		for (const auto& cell : line)
-		{
-			// If it is the first node, display it as the end of the path (node path is reversed)
-			if (finalNode->getPoint()->getX() == cell.getX() && finalNode->getPoint()->getY() == cell.getY())
-			{
-				std::cout << "E";
-				continue;
-			}
-
-			// If it is the last node, display it as the start of the path (node path is reversed)
-			if (firstNode->getPoint()->getX() == cell.getX() && firstNode->getPoint()->getY() == cell.getY())
-			{
-				std::cout << "S";
-				continue;
-			}
-
-			if (isInPath(finalNode.get(), cell))
-			{
-				std::cout << "#";
-				continue;
-			}
-			std::cout << fieldTypeInformations.at(cell.getFieldType()).first;
-		}
-		std::cout << std::endl;
-	}
 }
 
 // Add a new column to the map
@@ -162,7 +131,7 @@ void Map::createNewPoint(int x, int y, FIELD_TYPE fieldType)
 	// If point already exists, only update type
 	if (y <= greatestY && y >= smallestY && x <= greatestX && x >= smallestX)
 	{
-		if (getPoint(x, y)->getFieldType() == FIELD_TYPE::OBSTACLE && fieldType == FIELD_TYPE::ETP)
+		if ((getPoint(x, y)->getFieldType() == FIELD_TYPE::OBSTACLE && fieldType == FIELD_TYPE::ETP) || (getPoint(x, y)->getFieldType() == FIELD_TYPE::ETP && fieldType == FIELD_TYPE::ETP))
 		{
 			createNewPoint(x = rand() % greatestX, y = rand() % greatestY, fieldType);
 			return;
@@ -219,20 +188,6 @@ double Map::getDistanceBetweenTwoPoint(int x1, int y1, int x2, int y2) const
 	return sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2));
 }
 
-// Get the first node of the parent chain
-Node* Map::getFirstNode(Node* finalNode) const
-{
-	while (finalNode != NULL)
-	{
-		if (finalNode->getParent() == NULL)
-		{
-			return finalNode;
-		}
-		finalNode = finalNode->getParent();
-	}
-	return NULL;
-}
-
 // Get element with the lowest fCost
 std::shared_ptr<Node> Map::getLowestFCostIndex(const std::unordered_map<std::string, std::shared_ptr<Node>>& list) const
 {
@@ -281,6 +236,8 @@ void Map::searchForPath(int startingX, int startingY, int destinationX, int dest
 	std::unordered_map<std::string, std::shared_ptr<Node>> closeList;
 	// Key in the maps above are formated like : "x-coordinate;y-coordinate"
 
+	openList.clear();
+
 	//Add start node to openList
 	const std::shared_ptr<Node> startNode(new Node(getPoint(startingX, startingY)));
 	openList.insert({ std::to_string(startNode->getPoint()->getX()) + ';' + std::to_string(startNode->getPoint()->getY()) , startNode });
@@ -308,6 +265,10 @@ void Map::searchForPath(int startingX, int startingY, int destinationX, int dest
 				while (pathNode != nullptr)
 				{
 					fastestPathNodes++;
+					if (pathNode->getPoint()->getX() != startingX && pathNode->getPoint()->getY() != startingY && pathNode->getPoint()->getX() != destinationX && pathNode->getPoint()->getY() != destinationY)
+					{
+						pathNode->getPoint()->setFieldType(FIELD_TYPE::PATH);
+					}
 					pathNode = pathNode->getParent();
 				}
 
@@ -446,9 +407,7 @@ void Map::generateMapUsingPerlin()
 void Map::displayMapSFML() const
 {
 	const int tileSize = 1;  // Ajustez la taille de la tuile en pixels
-	sf::RenderWindow window(sf::VideoMode(board.size() * tileSize, board[0].size() * tileSize), "Map");
-
-	std::vector<Point> listeEntreprise;
+	sf::RenderWindow window(sf::VideoMode(board.size() * tileSize, board[0].size() * tileSize), "Map");;
 
 	while (window.isOpen())
 	{
@@ -475,8 +434,7 @@ void Map::displayMapSFML() const
 					tile.setFillColor(sf::Color::Black);
 					break;
 				case FIELD_TYPE::ETP:
-					tile.setFillColor(sf::Color::Red);
-					listeEntreprise.push_back(board[x][y]);
+					tile.setFillColor(sf::Color::Magenta);
 					break;
 				case FIELD_TYPE::GRASSLAND:
 					tile.setFillColor(sf::Color::Green);
@@ -493,17 +451,12 @@ void Map::displayMapSFML() const
 				case FIELD_TYPE::FOREST:
 					tile.setFillColor(sf::Color(51, 102, 0)); // Dark green for forest
 					break;
+				case FIELD_TYPE::PATH:
+					tile.setFillColor(sf::Color::Red);
+					break;
 				}
 				window.draw(tile);
 			}
-			//for (int i = 0; i < listeEntreprise.size(); i++)
-			//{
-			//	for  (int j = i + 1; j < listeEntreprise.size(); j++)
-			//	{
-			//	//searchForPath(listeEntreprise[i].getX(), listeEntreprise[i].getY(), listeEntreprise[j].getX(), listeEntreprise[j].getY());
-			//	std::cout << "Number of nodes explored between: " << listeEntreprise[i].getX() <<","<< listeEntreprise[i].getY() << " and " << listeEntreprise[j].getX() << "," << listeEntreprise[j].getY() << " = " << getFastestPathNodes() << std::endl;
-			//	}
-			//}
 		}
 		window.display();
 	}

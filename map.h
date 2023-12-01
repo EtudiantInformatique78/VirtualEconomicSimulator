@@ -51,9 +51,7 @@ private:
 	void createNewLine(COORDINATE_DIRECTION direction);
 	Point* getPoint(int x, int y);
 	double getDistanceBetweenTwoPoint(int x1, int y1, int x2, int y2) const;
-	void drawSolution(std::shared_ptr<Node> finalNode) const;
 	bool isInPath(Node* finalNode, const Point& cell) const;
-	Node* getFirstNode(Node* finalNode) const;
 	std::shared_ptr<Node> getLowestFCostIndex(const std::unordered_map<std::string, std::shared_ptr<Node>>& list) const;
 	bool isStartAndDestinationPointOnTheMap(int startingX, int startingY, int destinationX, int destinationY) const;
 };

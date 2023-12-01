@@ -8,7 +8,8 @@ enum class FIELD_TYPE
 	GRASSLAND,
 	FOREST,
 	MOUNTAIN,
-	BEACH
+	BEACH,
+	PATH
 };
 
 class Point

@@ -1,9 +1,8 @@
 #include <iostream>
 #include <math.h>
+
 #include "SFML/Graphics.hpp"
-
 #include "map.h"
-
 #include "perlin.h"
 
 
