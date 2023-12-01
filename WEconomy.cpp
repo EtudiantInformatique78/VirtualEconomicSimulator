@@ -250,7 +250,7 @@ void WEconomy::CreateCompanies()
 	{
 		for (int i = 0; i < nbCompanyPerProduct; i++)
 		{
-			shared_ptr<WCompany> company = make_shared<WCompany>(nbCompany, productInfo, position);
+			shared_ptr<WCompany> company = make_shared<WCompany>(nbCompany, productInfo);
 			nbCompany++;
 			companies.push_back(company);
 		}

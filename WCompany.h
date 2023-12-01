@@ -43,10 +43,10 @@ private:
 public:
 
 	const int id;
-	const pair<int, int> position;
+	pair<int, int> position;
 	const shared_ptr<WProductBaseInfo> productBaseInfo;
 
-	WCompany(int _id, shared_ptr<WProductBaseInfo> _productBaseInfo, pair<int, int> _position);
+	WCompany(int _id, shared_ptr<WProductBaseInfo> _productBaseInfo);
 	~WCompany();
 
 	// Getters

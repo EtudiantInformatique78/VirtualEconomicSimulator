@@ -1,8 +1,8 @@
 #include "WCompany.h"
 
 
-WCompany::WCompany(int _id, shared_ptr<WProductBaseInfo> _productBaseInfo, pair<int,int> _position) 
-	: id(_id), position(_position), productBaseInfo(_productBaseInfo)
+WCompany::WCompany(int _id, shared_ptr<WProductBaseInfo> _productBaseInfo) 
+	: id(_id), productBaseInfo(_productBaseInfo)
 {
 	capital = WConstants::COMPANY_START_CAPITAL;
 	nbMaxEmploye = WConstants::NB_EMPLOYE_START;
@@ -39,7 +39,7 @@ shared_ptr<WProductBaseInfo> WCompany::GetProductBaseInfo()
 
 int WCompany::GetNbOfPossibleProductToBuild()
 {
-	int unitWorkProduct = productBaseInfo->employeDayUnit;
+ 	int unitWorkProduct = productBaseInfo->employeDayUnit;
 	int nbOfPossibleProductToBuild = (nbEmploye * productivityEmploye) / unitWorkProduct;
 
 	if (nbOfPossibleProductToBuild == 0 && nbEmploye > 0) // Force employes to work more than one day
@@ -498,11 +498,3 @@ void WCompany::TrySellDirectlyToWelfareState(shared_ptr<WelfareState> welfareSta
 
 	endProductStock.clear();
 }
-
-
-
-// TODO : price cost material in output product
-
-// TODO : welfareState buy last product
-
-// TODO : Fluctuation price : how does it work with the new propagating system ?
