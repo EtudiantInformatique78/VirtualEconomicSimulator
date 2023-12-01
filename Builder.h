@@ -34,7 +34,7 @@ protected:
 public:
 	virtual ~IBuilder() {};
 	virtual void reset() = 0;
-	virtual void Build(std::vector<std::shared_ptr<Product>> vect) = 0;
+	virtual void Build(std::vector<std::shared_ptr<Product>> &vect) = 0;
 	std::shared_ptr<Product> getResult()
 	{
 		return result;
@@ -51,7 +51,7 @@ public:
 	{
 		result = nullptr;
 	}
-	void Build(std::vector<std::shared_ptr<Product>> vect) override
+	void Build(std::vector<std::shared_ptr<Product>> &vect) override
 	{
 		if(!vect.empty())
 		{
@@ -78,7 +78,7 @@ public:
 	void reset() override
 	{
 	}
-	void Build(std::vector<std::shared_ptr<Product>> vect) override
+	void Build(std::vector<std::shared_ptr<Product>> &vect) override
 	{
 		if (!vect.empty())
 		{
