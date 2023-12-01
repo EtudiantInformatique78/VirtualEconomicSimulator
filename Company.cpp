@@ -172,6 +172,7 @@ TreeCompany::~TreeCompany(){}
 IronCoreCompany::IronCoreCompany(std::string name) : RawMaterialCompany(name)
 {
 	this->factory = std::shared_ptr<IronFactory>(new IronFactory());
+	this->es = std::shared_ptr<EventSeller>(new EventSeller(*this));
 }
 
 IronCoreCompany::~IronCoreCompany(){}

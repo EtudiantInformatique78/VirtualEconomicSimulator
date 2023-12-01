@@ -44,8 +44,8 @@ int main()
     std::shared_ptr<IronCompany> di_ptr = std::dynamic_pointer_cast<IronCompany>(i_ptr);
     di_ptr->subscribeToACompany(*dic_ptr.get());
     di_ptr->buy();
-    //di_ptr->printProduct();
-    /*
+    di_ptr->printProduct();
+    
 
     std::cout << di_ptr->getWallet() << std::endl;
     di_ptr->produceProduct();
@@ -55,7 +55,7 @@ int main()
     {
         std::cout << *(*it) << std::endl;
     }
-    */
+  
     
 
     //dw_ptr->produceProduct();
