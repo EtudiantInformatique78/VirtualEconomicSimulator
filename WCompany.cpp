@@ -14,6 +14,8 @@ WCompany::WCompany(int _id, shared_ptr<WProductBaseInfo> _productBaseInfo, pair<
 
 	productInProduction = nullptr;
 
+	isFrozen = true;
+
 	margin = _productBaseInfo->baseMargin;
 	productionCost = _productBaseInfo->baseProductionCost;
 }
@@ -152,7 +154,7 @@ bool WCompany::RemoveFromRawStock(shared_ptr<WProductBaseInfo> productBaseInfo, 
 #pragma region DailyOperations
 void WCompany::ExecuteDailyOperations(bool isFirstOfTheMonth, shared_ptr<WCompany> thisCompany, shared_ptr<WelfareState> welfareState)
 {
-	if (isFirstOfTheMonth)
+	if (isFirstOfTheMonth && !isFrozen)
 	{
 		PaySalaries(welfareState);
 		TryRecrutEmploye();
@@ -283,6 +285,12 @@ bool WCompany::TryStartNewProduction(shared_ptr<WCompany> thisCompany)
 
 	if (quantity == 0)
 		return false;
+
+	if (isFrozen)
+	{
+		isFrozen = false;
+		cout << "        Company n " << id << " just started its first production !" << endl;
+	}
 
 	float daySpentOnProduct = productEmployeDayUnit / productivityEmploye;
 	float salaryCostPerDay = salaryEmploye / 31.0f; // 31 is number of day in a month

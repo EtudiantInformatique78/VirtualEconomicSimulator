@@ -30,6 +30,11 @@ private:
 	float productionCost;
 	float productivityEmploye;
 
+	/// <summary>
+	/// Allow to know if the production has started at least one time, if not, don't pay yet the salaries
+	/// </summary>
+	bool isFrozen; 
+
 	map<shared_ptr<WProductBaseInfo>, shared_ptr<list<shared_ptr<WProduct>>>> rawStock;
 	list<shared_ptr<WProduct>> endProductStock;
 

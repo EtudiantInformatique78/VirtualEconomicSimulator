@@ -19,8 +19,6 @@ int main()
 
     bool wantQuit = false;
 
-
-
     while (!wantQuit)
     {
         char ch = _getch();
