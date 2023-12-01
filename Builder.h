@@ -49,6 +49,7 @@ public:
 
 	void reset() override
 	{
+		result = nullptr;
 	}
 	void Build(std::vector<std::shared_ptr<Product>> vect) override
 	{
@@ -63,7 +64,7 @@ public:
 		}
 		else
 		{
-			
+			std::cout << "No product to transform" << std::endl;
 		}
 		
 	}

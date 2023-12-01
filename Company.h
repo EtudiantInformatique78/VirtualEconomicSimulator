@@ -141,17 +141,32 @@ class WoodCompany : public transformedMaterialCompany, public BuyerCompany
 {
 //private:
 //	std::shared_ptr<EventBuyer> eb;
+
+private:
+	std::vector<std::shared_ptr<Product>> productMade;
 public:
 	WoodCompany(std::string the_name);
 
+	// Getter
+	std::vector<std::shared_ptr<Product>> getProductMade()
+	{
+		return this->productMade;
+	}
+	
+	
+	// Method
 	void subscribeToACompany(SellerCompany& sc);
-
 	void produceProduct()
 	{
 		/*
 		I try to figure out
 		*/
+		ptr_builder->reset();
 		ptr_builder->Build(stockInit);
-		ptr_builder->getResult();
+		std::shared_ptr<Product> prod_ptr = ptr_builder->getResult();
+		if(prod_ptr != nullptr)
+		{
+			productMade.push_back(prod_ptr);
+		}
 	}
 };

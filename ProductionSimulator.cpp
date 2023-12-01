@@ -24,7 +24,15 @@ int main()
     dw_ptr->printProduct();
     std::cout << dw_ptr->getWallet() << std::endl;
     
-    //dw_ptr->produceProduct();
+    dw_ptr->produceProduct();
+    dw_ptr->produceProduct();
+    std::vector<std::shared_ptr<Product>>::iterator it;
+    std::vector<std::shared_ptr<Product>> pr = dw_ptr->getProductMade();
+    for(it = pr.begin(); it != pr.end() ; ++it )
+    {
+        std::cout << *(*it) << std::endl;
+    }
+    
     //dw_ptr->produceProduct();
 
     /*

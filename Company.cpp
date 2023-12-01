@@ -149,6 +149,7 @@ WoodCompany::WoodCompany(std::string the_name) : transformedMaterialCompany(the_
 {
 	this->ptr_builder = std::shared_ptr<MakeWood>(new MakeWood());
 	this->eb = std::shared_ptr<EventBuyer>(new EventBuyer(*this));
+	this->productMade = std::vector<std::shared_ptr<Product>>();
 }
 
 void WoodCompany::subscribeToACompany(SellerCompany& sc)
