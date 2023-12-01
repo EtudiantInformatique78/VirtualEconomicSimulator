@@ -45,6 +45,12 @@ int WCompany::GetNbOfPossibleProductToBuild()
 
 shared_ptr<list<shared_ptr<WPurchasingWish>>> WCompany::GetPurchasingWishes(shared_ptr<WCompany> thisPtr)
 {
+	if (productBaseInfo->GetProductTreeState() == ProductTreeState::FirstProductBottom)
+	{
+		// No wishes because don't buy on the marketplace but extract directly from earth
+		return nullptr;
+	}
+
 	int nbOfPossibleProductToBuild = GetNbOfPossibleProductToBuild();
 
 	if (nbOfPossibleProductToBuild == 0)
@@ -84,7 +90,7 @@ int WCompany::GetQuantityRawProductInStock(shared_ptr<WProductBaseInfo> productB
 	return quantity;
 }
 
-bool WCompany::RemoveFromRawStock(shared_ptr<WProductBaseInfo> productBaseInfo, int quantityToRemove)
+bool WCompany::RemoveFromRawStock(shared_ptr<WProductBaseInfo> productBaseInfo, int quantityToRemove, float& outTotalPrice)
 {
 	if (!rawStock.count(productBaseInfo))
 		return false;
@@ -103,6 +109,9 @@ bool WCompany::RemoveFromRawStock(shared_ptr<WProductBaseInfo> productBaseInfo, 
 		{
 			shared_ptr<WProduct> extractedProduct = product->Extract(quantityToRemove);
 			quantityToRemove = 0;
+
+			outTotalPrice += product->deltaCompanyPricePerUnit * quantityToRemove;
+
 			// TODO : register extraction from raw stock
 			break;
 		}
@@ -110,11 +119,14 @@ bool WCompany::RemoveFromRawStock(shared_ptr<WProductBaseInfo> productBaseInfo, 
 		if (quantityToRemove == quantityInProduct)
 		{
 			productToRemoveFromStock.push_back(product);
+
+			outTotalPrice += product->deltaCompanyPricePerUnit * quantityToRemove;
 			quantityToRemove = 0;
 			break;
 		}
 
 		// quantityToRemove > quantityInProduct
+		outTotalPrice += product->deltaCompanyPricePerUnit * quantityInProduct;
 		quantityToRemove -= quantityInProduct;
 		productToRemoveFromStock.push_back(product);
 	}
@@ -127,7 +139,6 @@ bool WCompany::RemoveFromRawStock(shared_ptr<WProductBaseInfo> productBaseInfo, 
 	{
 		rawStockProduct->remove(productToRemove);
 	}
-
 
 	return true;
 }
@@ -145,6 +156,8 @@ void WCompany::ExecuteDailyOperations(bool isFirstOfTheMonth, shared_ptr<WCompan
 	}
 
 	ExecuteEmployeWork(thisCompany);
+
+	TrySellDirectlyToWelfareState(welfareState);	
 
 	TryUpgradeResearchLevel(welfareState);
 }
@@ -213,6 +226,9 @@ void WCompany::ExecuteEmployeWork(shared_ptr<WCompany> thisCompany)
 	if (productInProduction == nullptr)
 		TryStartNewProduction(thisCompany);
 
+	if (productInProduction == nullptr) // Couldn't work
+		return;
+
 	float remainingWorkForceToFinishProduct = productInProduction->second;
 
 	remainingWorkForceToFinishProduct -= remainingEmployeWorkForceOfTheday;
@@ -222,6 +238,9 @@ void WCompany::ExecuteEmployeWork(shared_ptr<WCompany> thisCompany)
 	{
 		// Product Finished
 		shared_ptr<WProduct> finishedProduct = productInProduction->first;
+
+		cout << "		Company n " << thisCompany->id << " has just produced " << finishedProduct->GetQuantity() << thisCompany->GetProductBaseInfo()->name << " "
+
 		endProductStock.push_back(finishedProduct);
 		productInProduction = nullptr;
 
@@ -249,7 +268,15 @@ bool WCompany::TryStartNewProduction(shared_ptr<WCompany> thisCompany)
 	float quantityF = productEmployeDayUnit / employeWorkForceOfTheday;
 	int wishQuantity = (quantityF < 1.0f) ? 1 : quantityF;
 
-	int quantity = RetrieveRawProductsToBeginProduction(wishQuantity);
+	int quantity;
+	bool isFirstBottomproduct = (productBaseInfo->GetProductTreeState() == ProductTreeState::FirstProductBottom);
+
+	float totalPriceRawProduct = 0.0f;
+
+	if (isFirstBottomproduct)
+		quantity = wishQuantity; // RawStock are useless because bottom company don't buy products, they extract from earth
+	else
+		quantity = RetrieveRawProductsToBeginProduction(wishQuantity, totalPriceRawProduct);
 
 	if (quantity == 0)
 		return false;
@@ -258,7 +285,12 @@ bool WCompany::TryStartNewProduction(shared_ptr<WCompany> thisCompany)
 	float salaryCostPerDay = salaryEmploye / 31.0f; // 31 is number of day in a month
 	float salaryCostPerProduct = daySpentOnProduct * salaryCostPerDay;
 
-	float deltaCompanyPricePerUnit = (salaryCostPerProduct * quantity + productionCost) * (1 + margin) / quantity;
+	float deltaCompanyPricePerUnit;
+
+	if (isFirstBottomproduct)
+		deltaCompanyPricePerUnit = (salaryCostPerProduct * quantity * productionCost) * (1 + margin) / quantity; // production cost is multiplied to increase the price per unit compared to other company that buy raw products
+	else
+		deltaCompanyPricePerUnit = (salaryCostPerProduct * quantity + totalPriceRawProduct + productionCost) * (1 + margin) / quantity;
 
 	shared_ptr<WProduct> product = make_shared<WProduct>(deltaCompanyPricePerUnit, quantity, thisCompany);
 	productInProduction = make_shared<pair<shared_ptr<WProduct>, float>>(product, productBaseInfo->employeDayUnit * quantity);
@@ -266,7 +298,7 @@ bool WCompany::TryStartNewProduction(shared_ptr<WCompany> thisCompany)
 	return true;
 }
 
-int WCompany::RetrieveRawProductsToBeginProduction(int wishQuantity)
+int WCompany::RetrieveRawProductsToBeginProduction(int wishQuantity, float& outTotalPrice)
 {
 	int minimumAvailableRessourceProduct = INT_MAX;
 
@@ -292,13 +324,15 @@ int WCompany::RetrieveRawProductsToBeginProduction(int wishQuantity)
 	if (quantityToRetrieve == 0)
 		return 0;
 
+	outTotalPrice = 0.0f;
+
 	// Remove the raw products from stock
 	for (pair<shared_ptr<WProductBaseInfo>, int> material : compositionProductToProduce)
 	{
 		shared_ptr<WProductBaseInfo> productMaterial = material.first;
 		int requiredQuantityForOne = material.second;
 
-		RemoveFromRawStock(productMaterial, requiredQuantityForOne * quantityToRetrieve);
+		RemoveFromRawStock(productMaterial, requiredQuantityForOne * quantityToRetrieve, outTotalPrice);
 	}
 
 	return quantityToRetrieve;
@@ -356,7 +390,7 @@ float WCompany::GetDistanceFrom(shared_ptr<WCompany> company)
 	if (distanceFromCompany.count(company))
 		return distanceFromCompany[company];
 
-	// Calculate the distance and save it in distanceFromCompany
+	// TODO : Calculate the distance and save it in distanceFromCompany
 
 	return 5.0f;
 }
@@ -425,10 +459,26 @@ void WCompany::AddToRawStock(shared_ptr<WProductBaseInfo> productBaseInfo, share
 	rawStock[productBaseInfo]->push_back(productToAdd);
 }
 
+void WCompany::TrySellDirectlyToWelfareState(shared_ptr<WelfareState> welfareState)
+{
+	if (productBaseInfo->GetProductTreeState() != ProductTreeState::EndProductTop)
+		return;
+
+	for (shared_ptr<WProduct> productToSell : endProductStock)
+	{
+		int quantity = productToSell->GetQuantity();
+		float totalPrice = productToSell->GetPrice(quantity);
+
+		capital += welfareState->SellEndProduct(totalPrice);
+	}
+
+	endProductStock.clear();
+}
 
 
-// TODO : first products auto regule
 
 // TODO : price cost material in output product
 
 // TODO : welfareState buy last product
+
+// TODO : Fluctuation price : how does it work with the new propagating system ?

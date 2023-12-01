@@ -40,7 +40,7 @@ public:
 	void AddToMarket(shared_ptr<WProductBaseInfo> productBaseInfo, list<shared_ptr<WProduct>> endproductStock);
 	void AddPurchasingWishesCompany(shared_ptr<list<shared_ptr<WPurchasingWish>>> purchasingWishesCompany);
 
-	void CalculateNewProductsRates();
+	//void CalculateNewProductsRates();
 	int CountNbProducts(list<shared_ptr<WProduct>>& products);
 	int CountWishesInMarket(shared_ptr<WProductBaseInfo> productBaseInfo);
 	void SelectCompanyDealsByProduct(shared_ptr<WProductBaseInfo> productBaseInfo, list<shared_ptr<WPurchasingWish>> purchasingWishes);

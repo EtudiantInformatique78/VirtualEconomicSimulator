@@ -53,6 +53,9 @@ void WMarketPlace::RetrieveEndProductsStocks()
 	// Add all end products of each company to the market
 	for (shared_ptr<WCompany> const company : companies)
 	{
+		if (company->GetProductBaseInfo()->GetProductTreeState() == ProductTreeState::EndProductTop) // Only WelfareState buy end product and they don't buy it on the marketplace but directly
+			continue;
+
 		shared_ptr<WProductBaseInfo> productBaseInfo = company->GetProductBaseInfo();
 		list<shared_ptr<WProduct>> endproductStock = company->GetEndProductStock();
 
@@ -122,7 +125,7 @@ int WMarketPlace::CountWishesInMarket(shared_ptr<WProductBaseInfo> productBaseIn
 	return nbQuantity;
 }
 
-void UpdateFloatingPrice(shared_ptr<WProductBaseInfo> productBaseInfo, int nbProducts, int nbWishes)
+/*void WMarketPlace::UpdateFloatingPrice(shared_ptr<WProductBaseInfo> productBaseInfo, int nbProducts, int nbWishes)
 {
 	float rateToApply = 0;
 
@@ -143,51 +146,51 @@ void UpdateFloatingPrice(shared_ptr<WProductBaseInfo> productBaseInfo, int nbPro
 	}
 
 	productBaseInfo->UpdateFloatingPrice(rateToApply);
-}
+}*/
 
 
-void WMarketPlace::CalculateNewProductsRates()
-{
-	map<shared_ptr<WProductBaseInfo>, bool> calculatedProducts;
-
-	for (pair<shared_ptr<WProductBaseInfo>, list<shared_ptr<WProduct>>> productStock : marketStocks)
-	{
-		shared_ptr<WProductBaseInfo> productBaseInfo = productStock.first;
-		list<shared_ptr<WProduct>> products = productStock.second;
-
-		calculatedProducts[productBaseInfo] = true;
-
-		int nbProducts = CountNbProducts(products);
-		int nbWishes = CountWishesInMarket(productBaseInfo);
-
-		UpdateFloatingPrice(productBaseInfo, nbProducts, nbWishes);
-	}
-
-	// Handle the wishes that don't have any stock
-	for (pair<shared_ptr<WProductBaseInfo>, list<shared_ptr<WPurchasingWish>>> purchasingWishesByProduct : purchasingWishesByProducts)
-	{
-		shared_ptr<WProductBaseInfo> productBaseInfo = purchasingWishesByProduct.first;
-
-		if (calculatedProducts.count(productBaseInfo))
-			continue;
-
-		calculatedProducts[productBaseInfo] = true;
-
-		list<shared_ptr<WPurchasingWish>> purchasingWish = purchasingWishesByProduct.second;
-
-		int nbProducts = 0;
-		int nbWishes = CountWishesInMarket(productBaseInfo);
-
-		UpdateFloatingPrice(productBaseInfo, nbProducts, nbWishes);
-	}
-}
+//void WMarketPlace::CalculateNewProductsRates()
+//{
+//	map<shared_ptr<WProductBaseInfo>, bool> calculatedProducts;
+//
+//	for (pair<shared_ptr<WProductBaseInfo>, list<shared_ptr<WProduct>>> productStock : marketStocks)
+//	{
+//		shared_ptr<WProductBaseInfo> productBaseInfo = productStock.first;
+//		list<shared_ptr<WProduct>> products = productStock.second;
+//
+//		calculatedProducts[productBaseInfo] = true;
+//
+//		int nbProducts = CountNbProducts(products);
+//		int nbWishes = CountWishesInMarket(productBaseInfo);
+//
+//		UpdateFloatingPrice(productBaseInfo, nbProducts, nbWishes);
+//	}
+//
+//	// Handle the wishes that don't have any stock
+//	for (pair<shared_ptr<WProductBaseInfo>, list<shared_ptr<WPurchasingWish>>> purchasingWishesByProduct : purchasingWishesByProducts)
+//	{
+//		shared_ptr<WProductBaseInfo> productBaseInfo = purchasingWishesByProduct.first;
+//
+//		if (calculatedProducts.count(productBaseInfo))
+//			continue;
+//
+//		calculatedProducts[productBaseInfo] = true;
+//
+//		list<shared_ptr<WPurchasingWish>> purchasingWish = purchasingWishesByProduct.second;
+//
+//		int nbProducts = 0;
+//		int nbWishes = CountWishesInMarket(productBaseInfo);
+//
+//		UpdateFloatingPrice(productBaseInfo, nbProducts, nbWishes);
+//	}
+//}
 
 pair<shared_ptr<WProduct>, shared_ptr<WPriceDetailsPerUnit>> WMarketPlace::GetCheapestProduct(shared_ptr<WPurchasingWish> purchasingWish, list<shared_ptr<WProduct>>& marketStock)
 {
 	shared_ptr<WProductBaseInfo> productBaseInfo = purchasingWish->product;
 	shared_ptr<WCompany> companyThatPurchase = purchasingWish->company;
 
-	shared_ptr<WPriceDetailsPerUnit> priceDetails = make_shared<WPriceDetailsPerUnit>(.0f, .0f, .0f);
+	shared_ptr<WPriceDetailsPerUnit> priceDetails = make_shared<WPriceDetailsPerUnit>(.0f, .0f);
 
 	shared_ptr<WProduct> cheapestProduct = nullptr;
 	float cheapestPrice = 99999999999999999999999999999999999999.9999999999f;
@@ -196,7 +199,7 @@ pair<shared_ptr<WProduct>, shared_ptr<WPriceDetailsPerUnit>> WMarketPlace::GetCh
 	{
 		float transporationPricePerUnit = companyThatPurchase->GetDistanceFrom(product->company) * productBaseInfo->transportationCostPerKmPerUnit;
 
-		float finalPrice = productBaseInfo->GetFloatingPricePerUnit() + transporationPricePerUnit + product->deltaCompanyPricePerUnit;
+		float finalPrice = transporationPricePerUnit + product->deltaCompanyPricePerUnit;
 
 		if (finalPrice > cheapestPrice)
 			continue;
@@ -204,7 +207,7 @@ pair<shared_ptr<WProduct>, shared_ptr<WPriceDetailsPerUnit>> WMarketPlace::GetCh
 		cheapestPrice = finalPrice;
 		cheapestProduct = product;
 
-		priceDetails = make_shared<WPriceDetailsPerUnit>(productBaseInfo->GetFloatingPricePerUnit(), transporationPricePerUnit, product->deltaCompanyPricePerUnit);
+		priceDetails = make_shared<WPriceDetailsPerUnit>(transporationPricePerUnit, product->deltaCompanyPricePerUnit);
 	}
 
 	return pair<shared_ptr<WProduct>, shared_ptr<WPriceDetailsPerUnit>>(cheapestProduct, priceDetails);
@@ -213,7 +216,6 @@ pair<shared_ptr<WProduct>, shared_ptr<WPriceDetailsPerUnit>> WMarketPlace::GetCh
 
 void WMarketPlace::SelectCompanyDealsByProduct(shared_ptr<WProductBaseInfo> productBaseInfo, list<shared_ptr<WPurchasingWish>> purchasingWishes)
 {
-	float basePrice = productBaseInfo->GetFloatingPricePerUnit();
 	float transportationCostPerKm = productBaseInfo->transportationCostPerKmPerUnit;
 
 	list<shared_ptr<WProduct>> marketStock = marketStocks[productBaseInfo];
@@ -250,20 +252,22 @@ void WMarketPlace::SelectCompanyDealsByProduct(shared_ptr<WProductBaseInfo> prod
 
 		int nbProductPurchased = (nbWishPurchaseProduct > nbAvailableProductInStock) ? nbAvailableProductInStock : nbWishPurchaseProduct;
 
-		float paidPriceBetweenCompanies = nbProductPurchased * (priceDetails->floatingPrice + priceDetails->deltaCompanyPrice);
+		float paidPriceBetweenCompanies = nbProductPurchased * (priceDetails->deltaCompanyPrice);
 		float transportationPrice = nbProductPurchased * priceDetails->transportationPrice;
 
-		float totalPrice = paidPriceBetweenCompanies + transportationPrice;
+		float totalPriceToPayForBuyer = paidPriceBetweenCompanies + transportationPrice;
 
-		if (!buyingCompany->CanPay(totalPrice) || !buyingCompany->AttemptDeductionPayment(totalPrice))
+		if (!buyingCompany->CanPay(totalPriceToPayForBuyer) || !buyingCompany->AttemptDeductionPayment(totalPriceToPayForBuyer))
 		{
 			failedAttempt--;
 			continue;
 		}
 
+		cout << "		Company n " << buyingCompany->id << " has spent " << totalPriceToPayForBuyer << "." << endl;
+
 		economy->welfareState->PayTransportation(transportationPrice);
 		
-		bool succeedBuying = false;;
+		bool succeedBuying = false;
 		shared_ptr<WProduct> possibleExtractedProduct = sellingCompany->AttemptBuyProduct(succeedBuying, productToPurchase, paidPriceBetweenCompanies, nbProductPurchased);
 
 		if (!succeedBuying)
@@ -272,13 +276,20 @@ void WMarketPlace::SelectCompanyDealsByProduct(shared_ptr<WProductBaseInfo> prod
 			continue;
 		}
 
-		// TODO : here transaction registering
 
 		if (possibleExtractedProduct != nullptr)
+		{
 			buyingCompany->AddToRawStock(productBaseInfo, possibleExtractedProduct);
+			possibleExtractedProduct->SetNewDeltaCompanyPricePerUnitFromPurchase(totalPriceToPayForBuyer);
+		}
 		else
+		{
+		
 			buyingCompany->AddToRawStock(productBaseInfo, productToPurchase);
+			productToPurchase->SetNewDeltaCompanyPricePerUnitFromPurchase(totalPriceToPayForBuyer);
+		}
 
+		// TODO : here transaction registering
 
 		if (nbWishPurchaseProduct > nbAvailableProductInStock) // Means that keep WishPurchase
 		{

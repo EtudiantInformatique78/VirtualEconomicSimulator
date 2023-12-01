@@ -22,7 +22,7 @@ WEconomy::WEconomy(shared_ptr<WelfareState> _welfareState, shared_ptr<WMarketPla
 
 	time(&currentTime);
 
-	shared_ptr<tm> currentDate = make_shared<tm>();
+	currentDate = make_shared<tm>();
 	localtime_s(currentDate.get(), &currentTime);
 
 	currentDate->tm_hour = 0;
@@ -42,8 +42,10 @@ list<shared_ptr<WCompany>> WEconomy::GetCompanies()
 
 void WEconomy::IncrementDay()
 {
-	currentDate->tm_mday += 1;
+	currentDate->tm_mday++;
 	mktime(currentDate.get());
+
+	cout << "New Day : " << currentDate->tm_mday << "/" << currentDate->tm_mon + 1 << "/" << currentDate->tm_year + 1900 << endl;
 
 	bool isFirstOfTheMonth = (currentDate->tm_mday == 1);
 
@@ -68,18 +70,22 @@ void WEconomy::AddValueToBuilder(shared_ptr<WProductBaseInfoBuilder> productBuil
 			productBuilder->name = value;
 			break;
 		case 2:
-			productBuilder->baseProductionCost = stof(value);
+			if (value == "true")
+				productBuilder->productTreeState = ProductTreeState::EndProductTop;
 			break;
 		case 3:
-			productBuilder->baseMargin = stof(value);
+			productBuilder->baseProductionCost = stof(value);
 			break;
 		case 4:
-			productBuilder->employeDayUnit = stoi(value);
+			productBuilder->baseMargin = stof(value);
 			break;
 		case 5:
-			productBuilder->transportationCostPerkmPerUnit = stof(value);
+			productBuilder->employeDayUnit = stoi(value);
 			break;
 		case 6:
+			productBuilder->transportationCostPerkmPerUnit = stof(value);
+			break;
+		case 7:
 			if(!value.empty())
 				productBuilder->composition = value;
 			break;
@@ -144,6 +150,7 @@ void WEconomy::AddCompositionToProducts(map<int, shared_ptr<WProductBaseInfoBuil
 	// Iterate with this method in case of Ids are discontinued
 	for (auto element = productsBaseInfoBuilders.begin(); element != productsBaseInfoBuilders.end(); element++)
 	{
+		bool addedAComposition = false;
 		int id = element->first;
 		shared_ptr<WProductBaseInfoBuilder> productBaseInfoBuilder = element->second;
 		shared_ptr<WProductBaseInfo> productBaseInfo = productsBaseInfos[id];
@@ -176,7 +183,12 @@ void WEconomy::AddCompositionToProducts(map<int, shared_ptr<WProductBaseInfoBuil
 			shared_ptr<WProductBaseInfo> compositionProduct = productsBaseInfos[outId];
 
 			productBaseInfo->AddCompositionProduct(outQuantity, compositionProduct);
+
+			addedAComposition = true;
 		}
+
+		if (!addedAComposition)
+			productBaseInfo->SetProductTreeStateAsBottom();
 	}
 }
 

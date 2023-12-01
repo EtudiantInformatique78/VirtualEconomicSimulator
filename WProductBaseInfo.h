@@ -6,12 +6,11 @@ class WProductBaseInfo
 {
 private:
 	float floatingPricePerUnit;
+	ProductTreeState productTreeState;
 
 public:
 	const string name;
 	const int id;
-
-	const float basePrice;
 
 	/// <summary>
 	/// In % -> ex : .20
@@ -23,13 +22,18 @@ public:
 
 	const float transportationCostPerKmPerUnit;
 
+
 	map<shared_ptr<WProductBaseInfo>, int> composition;
 
 	WProductBaseInfo(shared_ptr<WProductBaseInfoBuilder> _builder);
 	~WProductBaseInfo();
 
-	void UpdateFloatingPrice(float rate);
-	float GetFloatingPricePerUnit();
+	void SetProductTreeStateAsBottom();
+
+	//void UpdateFloatingPrice(float rate);
+	//float GetFloatingPricePerUnit();
 
 	void AddCompositionProduct(int quantity, shared_ptr<WProductBaseInfo> compositionProduct);
+
+	ProductTreeState GetProductTreeState();
 };

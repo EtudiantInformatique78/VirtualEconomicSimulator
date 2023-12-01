@@ -1,5 +1,6 @@
 #pragma once
 #include "WBaseInclusion.h"
+#include "ProductTreeState.h"
 
 class WProductBaseInfoBuilder
 {
@@ -17,6 +18,8 @@ public:
 	float transportationCostPerkmPerUnit;
 
 	string composition;
+
+	ProductTreeState productTreeState;
 
 	WProductBaseInfoBuilder();
 	~WProductBaseInfoBuilder();

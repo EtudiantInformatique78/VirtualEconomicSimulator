@@ -50,3 +50,10 @@ void WelfareState::DistributeMoney()
 	transportationPool = 0;
 	researchPool = 0;
 }
+
+float WelfareState::SellEndProduct(float totalPrice)
+{
+	// useless return system function but in case implement other system here (keep it for now !)
+	// monetary creation here, like the real economy, to expend the activities
+	return totalPrice;
+}

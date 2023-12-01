@@ -11,6 +11,8 @@ WProductBaseInfoBuilder::WProductBaseInfoBuilder()
 	baseProductionCost = -1;
 	transportationCostPerkmPerUnit = -1;
 
+	productTreeState = ProductTreeState::InMiddle;
+
 	composition = "";
 }
 

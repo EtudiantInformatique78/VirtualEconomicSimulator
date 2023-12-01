@@ -57,12 +57,12 @@ public:
 	void TryRecrutEmploye();
 	void ExecuteEmployeWork(shared_ptr<WCompany> thisCompany);
 	bool TryStartNewProduction(shared_ptr<WCompany> thisCompany);
-	int RetrieveRawProductsToBeginProduction(int wishQuantity);
+	int RetrieveRawProductsToBeginProduction(int wishQuantity, float& outTotalPrice);
 	void TryUpgradeResearchLevel(shared_ptr<WelfareState> welfareState);
 
 
 	// Stock
-	bool RemoveFromRawStock(shared_ptr<WProductBaseInfo> productBaseInfo, int quantity);
+	bool RemoveFromRawStock(shared_ptr<WProductBaseInfo> productBaseInfo, int quantity, float& outTotalPrice);
 
 	// Transactions Market
 	void ReceiveMoney(float amount);
@@ -75,5 +75,7 @@ public:
 	shared_ptr<WProduct> AttemptBuyProduct(bool& succeedBuying, shared_ptr<WProduct> product, float totalPrice, int quantity);
 
 	void AddToRawStock(shared_ptr<WProductBaseInfo> productBaseInfo, shared_ptr<WProduct> productToAdd);
+
+	void TrySellDirectlyToWelfareState(shared_ptr<WelfareState> welfareState);
 
 };

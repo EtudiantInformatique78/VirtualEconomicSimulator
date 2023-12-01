@@ -1,29 +1,29 @@
--- Id, Name, baseProductionCost, baseMargin, employeDayUnit, transportationCostPerKmPerUnit, composition
-1;Fusee;6500;2.2;10;100;3-4/4-1/5-9
-2;CyberTruck;4500;2.1;10;100;6-4/7-1/8-4/9-1
-3;Ordinateur de bord;940;.82;5;20;17-20
-4;Fuselage;836;.84;5;20;10-1/11-1/12-4/13-2
-5;Moteur Fusee;790;.65;5;20;25-40/17-20
-6;Moteur Electrique;950;.84;5;20;19-4/20-5/17-5
-7;Carrosserie;850;.73;5;20;14-1/15-1/16-1/18-21
-8;Roue;240;.71;5;20;25-5/23-20
-9;Ordinateur Coduite;150;.72;5;20;17-21
-10;Premier Etage;71;.54;4;5;21-5
-11;Second Etage;84;.55;4;5;21-4
-12;Aileron;64;.53;4;5;21-3
-13;Reservoir;55;.51;4;5;21-8
-14;Porte;65;.25;4;5;21-5
-15;PareChoc Avant;74;.2;4;5;21-3
-16;PareChox Arriere;75;.15;4;5;21-3
-17;Circuit Eletronique;50;.12;3;2;22-5
-18;Joints;35;.10;3;2;23-5
-19;Ventilateur;20;.09;3;2;20-5
-20;Bobine;8;.08;2;1;24-5
-21;Plaque Inox;7;.07;2;1;26-1
-22;MicroProcesseur;6;.06;2;1;27-2
-23;Caoutchouc;5;.05;2;1;28-3
-24;Cuivre;1.1;.05;1;0.1;
-25;Titane;1;.03;1;0.1;
-26;Inox;.9;0.4;1;0.1;
-27;Slicium;.8;.05;1;0.1;
-28;Petrole;.7;.03;1;0.1;
+-- Id, Name, endProduct, baseProductionCost, baseMargin, employeDayUnit, transportationCostPerKmPerUnit, composition
+1;Fusee;true;6500;2.2;10;100;3-4/4-1/5-9
+2;CyberTruck;true;4500;2.1;10;100;6-4/7-1/8-4/9-1
+3;Ordinateur de bord;false;940;.82;5;20;17-20
+4;Fuselage;false;836;.84;5;20;10-1/11-1/12-4/13-2
+5;Moteur Fusee;false;790;.65;5;20;25-40/17-20
+6;Moteur Electrique;false;950;.84;5;20;19-4/20-5/17-5
+7;Carrosserie;false;850;.73;5;20;14-1/15-1/16-1/18-21
+8;Roue;false;240;.71;5;20;25-5/23-20
+9;Ordinateur Coduite;false;150;.72;5;20;17-21
+10;Premier Etage;false;71;.54;4;5;21-5
+11;Second Etage;false;84;.55;4;5;21-4
+12;Aileron;false;64;.53;4;5;21-3
+13;Reservoir;false;55;.51;4;5;21-8
+14;Porte;false;65;.25;4;5;21-5
+15;PareChoc Avant;false;74;.2;4;5;21-3
+16;PareChox Arriere;false;75;.15;4;5;21-3
+17;Circuit Eletronique;false;50;.12;3;2;22-5
+18;Joints;false;35;.10;3;2;23-5
+19;Ventilateur;false;20;.09;3;2;20-5
+20;Bobine;false;8;.08;2;1;24-5
+21;Plaque Inox;false;7;.07;2;1;26-1
+22;MicroProcesseur;false;6;.06;2;1;27-2
+23;Caoutchouc;false;5;.05;2;1;28-3
+24;Cuivre;false;1.1;.05;1;0.1;
+25;Titane;false;1;.03;1;0.1;
+26;Inox;false;.9;0.4;1;0.1;
+27;Slicium;false;.8;.05;1;0.1;
+28;Petrole;false;.7;.03;1;0.1;

@@ -1,8 +1,9 @@
 #include "WProduct.h"
 
-WProduct::WProduct(float _deltaCompanyPricePerUnit, int _quantity, shared_ptr<WCompany> _company) : deltaCompanyPricePerUnit(_deltaCompanyPricePerUnit), company(_company)
+WProduct::WProduct(float _deltaCompanyPricePerUnit, int _quantity, shared_ptr<WCompany> _company) : company(_company)
 {
 	quantity = _quantity;
+	deltaCompanyPricePerUnit = _deltaCompanyPricePerUnit;
 }
 
 WProduct::~WProduct()
@@ -30,4 +31,9 @@ shared_ptr<WProduct> WProduct::Extract(int quantityToExtract)
 	shared_ptr<WProduct> extractedProduct = make_shared<WProduct>(deltaCompanyPricePerUnit, quantityToExtract, company);
 
 	return extractedProduct;
+}
+
+void WProduct::SetNewDeltaCompanyPricePerUnitFromPurchase(float totalAmountPaid)
+{
+	deltaCompanyPricePerUnit = totalAmountPaid / quantity;
 }

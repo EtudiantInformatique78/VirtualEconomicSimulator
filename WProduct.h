@@ -12,7 +12,7 @@ private:
 
 public:
 
-	const float deltaCompanyPricePerUnit;
+	float deltaCompanyPricePerUnit;
 	const shared_ptr<WCompany> company;
 
 	WProduct(float _deltaCompanyPricePerUnit, int _quantity, shared_ptr<WCompany> company);
@@ -22,6 +22,8 @@ public:
 	int GetQuantity();
 
 	shared_ptr<WProduct> Extract(int quantity);
+
+	void SetNewDeltaCompanyPricePerUnitFromPurchase(float totalAmountPaid);
 
 };
 

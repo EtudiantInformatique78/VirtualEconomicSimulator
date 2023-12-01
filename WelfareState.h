@@ -28,7 +28,7 @@ public:
 	void PayResearch(float value);
 
 	void DistributeMoney();
-
+	float SellEndProduct(float totalPrice);
 
 };
 

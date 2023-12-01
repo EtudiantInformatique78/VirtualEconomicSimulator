@@ -4,7 +4,7 @@
 #include "WProduct.h"
 #include "WCompany.h"
 #include "WMarketPlace.h"
-
+#include <conio.h>
 
 #include <iostream>
 
@@ -16,5 +16,21 @@ int main()
     economy->LoadProductTree();
     economy->CreateCompanies();
 
-    std::cout << "cc" << std::endl;
+
+    bool wantQuit = false;
+
+
+
+    while (!wantQuit)
+    {
+        char ch = _getch();
+
+        if (ch == 'q')
+            wantQuit = true;
+
+        economy->IncrementDay();
+    }
+
+
+   
 }
