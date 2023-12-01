@@ -28,7 +28,13 @@ void WMarketPlace::Remove(shared_ptr<WCompany> companyToremove)
 	companies.remove(companyToremove);
 }
 
+void WMarketPlace::ExecuteDailyOperations()
+{
+	RetrieveEndProductsStocks();
+	RetrievePurchasingWishes();
 
+	ExecuteCompanyDeals();
+}
 
 void WMarketPlace::AddToMarket(shared_ptr<WProductBaseInfo> productBaseInfo, list<shared_ptr<WProduct>> endproductStock)
 {
@@ -58,6 +64,9 @@ void WMarketPlace::RetrieveEndProductsStocks()
 
 		shared_ptr<WProductBaseInfo> productBaseInfo = company->GetProductBaseInfo();
 		list<shared_ptr<WProduct>> endproductStock = company->GetEndProductStock();
+
+		if (endproductStock.size() == 0)
+			continue;
 
 		AddToMarket(productBaseInfo, endproductStock);
 	}
@@ -95,6 +104,20 @@ void WMarketPlace::RetrievePurchasingWishes()
 	}
 }
 
+void WMarketPlace::ExecuteCompanyDeals()
+{
+	// for each product
+	for (pair<shared_ptr<WProductBaseInfo>, list<shared_ptr<WPurchasingWish>>> purchasingWishesByProduct : purchasingWishesByProducts)
+	{
+		shared_ptr<WProductBaseInfo> productBaseInfo = purchasingWishesByProduct.first;
+
+		if (!marketStocks.count(productBaseInfo))
+			continue;
+
+		list<shared_ptr<WPurchasingWish>> purchasingWishes = purchasingWishesByProduct.second;
+		ExecuteCompanyDealsByProduct(productBaseInfo, purchasingWishes);
+	}
+}
 
 int WMarketPlace::CountNbProducts(list<shared_ptr<WProduct>>& products)
 {
@@ -214,7 +237,7 @@ pair<shared_ptr<WProduct>, shared_ptr<WPriceDetailsPerUnit>> WMarketPlace::GetCh
 }
 
 
-void WMarketPlace::SelectCompanyDealsByProduct(shared_ptr<WProductBaseInfo> productBaseInfo, list<shared_ptr<WPurchasingWish>> purchasingWishes)
+void WMarketPlace::ExecuteCompanyDealsByProduct(shared_ptr<WProductBaseInfo> productBaseInfo, list<shared_ptr<WPurchasingWish>> purchasingWishes)
 {
 	float transportationCostPerKm = productBaseInfo->transportationCostPerKmPerUnit;
 
@@ -226,7 +249,7 @@ void WMarketPlace::SelectCompanyDealsByProduct(shared_ptr<WProductBaseInfo> prod
 	// Security while
 	int failedAttempt = 3;
 
-	while (purchasingWishes.size() > 0 && marketStock.size() == 0 && failedAttempt > 0)
+	while (purchasingWishes.size() > 0 && marketStock.size() > 0 && failedAttempt > 0)
 	{
 		uniform_int_distribution<>distrib(0, purchasingWishes.size() - 1);
 
@@ -257,16 +280,12 @@ void WMarketPlace::SelectCompanyDealsByProduct(shared_ptr<WProductBaseInfo> prod
 
 		float totalPriceToPayForBuyer = paidPriceBetweenCompanies + transportationPrice;
 
-		if (!buyingCompany->CanPay(totalPriceToPayForBuyer) || !buyingCompany->AttemptDeductionPayment(totalPriceToPayForBuyer))
+		if (!buyingCompany->CanPay(totalPriceToPayForBuyer))
 		{
 			failedAttempt--;
 			continue;
 		}
 
-		cout << "		Company n " << buyingCompany->id << " has spent " << totalPriceToPayForBuyer << "." << endl;
-
-		economy->welfareState->PayTransportation(transportationPrice);
-		
 		bool succeedBuying = false;
 		shared_ptr<WProduct> possibleExtractedProduct = sellingCompany->AttemptBuyProduct(succeedBuying, productToPurchase, paidPriceBetweenCompanies, nbProductPurchased);
 
@@ -276,17 +295,26 @@ void WMarketPlace::SelectCompanyDealsByProduct(shared_ptr<WProductBaseInfo> prod
 			continue;
 		}
 
+		buyingCompany->AttemptDeductionPayment(totalPriceToPayForBuyer); // Don't check if succeed because CanPay above already checked if it can
+
+		economy->welfareState->PayTransportation(transportationPrice);
 
 		if (possibleExtractedProduct != nullptr)
 		{
 			buyingCompany->AddToRawStock(productBaseInfo, possibleExtractedProduct);
 			possibleExtractedProduct->SetNewDeltaCompanyPricePerUnitFromPurchase(totalPriceToPayForBuyer);
+
+			cout << "		Company n " << buyingCompany->id << " just bought " << possibleExtractedProduct->GetQuantity() << "x " << productBaseInfo->name << " for " << totalPriceToPayForBuyer << " euros." << endl;
+
 		}
 		else
 		{
 		
 			buyingCompany->AddToRawStock(productBaseInfo, productToPurchase);
 			productToPurchase->SetNewDeltaCompanyPricePerUnitFromPurchase(totalPriceToPayForBuyer);
+
+			cout << "		Company n " << buyingCompany->id << " just bought " << productToPurchase->GetQuantity() << "x " << productBaseInfo->name << " for " << totalPriceToPayForBuyer << " euros." << endl;
+
 		}
 
 		// TODO : here transaction registering
@@ -306,21 +334,5 @@ void WMarketPlace::SelectCompanyDealsByProduct(shared_ptr<WProductBaseInfo> prod
 		{
 			purchasingWishes.remove(selectedPurchasingWish);
 		}
-	}
-}
-
-
-void WMarketPlace::SelectCompanyDeals()
-{
-	// for each product
-	for (pair<shared_ptr<WProductBaseInfo>, list<shared_ptr<WPurchasingWish>>> purchasingWishesByProduct : purchasingWishesByProducts)
-	{
-		shared_ptr<WProductBaseInfo> productBaseInfo = purchasingWishesByProduct.first;
-
-		if (!marketStocks.count(productBaseInfo))
-			continue;
-
-		list<shared_ptr<WPurchasingWish>> purchasingWishes = purchasingWishesByProduct.second;
-		SelectCompanyDealsByProduct(productBaseInfo, purchasingWishes);
 	}
 }

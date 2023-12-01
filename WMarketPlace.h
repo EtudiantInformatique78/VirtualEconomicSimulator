@@ -34,6 +34,10 @@ public:
 
 	void Add(shared_ptr<WCompany> newCompany);
 	void Remove(shared_ptr<WCompany> companyToremove);
+
+	void ExecuteDailyOperations();
+	void ExecuteCompanyDeals();
+
 	void RetrieveEndProductsStocks();
 	void RetrievePurchasingWishes();
 
@@ -43,8 +47,7 @@ public:
 	//void CalculateNewProductsRates();
 	int CountNbProducts(list<shared_ptr<WProduct>>& products);
 	int CountWishesInMarket(shared_ptr<WProductBaseInfo> productBaseInfo);
-	void SelectCompanyDealsByProduct(shared_ptr<WProductBaseInfo> productBaseInfo, list<shared_ptr<WPurchasingWish>> purchasingWishes);
-	void SelectCompanyDeals();
+	void ExecuteCompanyDealsByProduct(shared_ptr<WProductBaseInfo> productBaseInfo, list<shared_ptr<WPurchasingWish>> purchasingWishes);
 
 	pair<shared_ptr<WProduct>, shared_ptr<WPriceDetailsPerUnit>> GetCheapestProduct(shared_ptr<WPurchasingWish> purchasingWish, list<shared_ptr<WProduct>>& marketStock);
 

@@ -5,7 +5,6 @@
 class WProductBaseInfo
 {
 private:
-	float floatingPricePerUnit;
 	ProductTreeState productTreeState;
 
 public:
@@ -30,8 +29,6 @@ public:
 
 	void SetProductTreeStateAsBottom();
 
-	//void UpdateFloatingPrice(float rate);
-	//float GetFloatingPricePerUnit();
 
 	void AddCompositionProduct(int quantity, shared_ptr<WProductBaseInfo> compositionProduct);
 

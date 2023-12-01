@@ -54,6 +54,8 @@ void WEconomy::IncrementDay()
 		company->ExecuteDailyOperations(isFirstOfTheMonth, company, welfareState);
 	}
 
+	marketPlace->ExecuteDailyOperations();
+
 	if(isFirstOfTheMonth)
 		welfareState->DistributeMoney();
 }

@@ -40,6 +40,9 @@ int WCompany::GetNbOfPossibleProductToBuild()
 	int unitWorkProduct = productBaseInfo->employeDayUnit;
 	int nbOfPossibleProductToBuild = (nbEmploye * productivityEmploye) / unitWorkProduct;
 
+	if (nbOfPossibleProductToBuild == 0 && nbEmploye > 0) // Force employes to work more than one day
+		return 1;
+
 	return nbOfPossibleProductToBuild;
 }
 
@@ -239,7 +242,7 @@ void WCompany::ExecuteEmployeWork(shared_ptr<WCompany> thisCompany)
 		// Product Finished
 		shared_ptr<WProduct> finishedProduct = productInProduction->first;
 
-		cout << "		Company n " << thisCompany->id << " has just produced " << finishedProduct->GetQuantity() << thisCompany->GetProductBaseInfo()->name << " "
+		cout << "		Company n " << thisCompany->id << " has just produced " << finishedProduct->GetQuantity() << "x " << thisCompany->GetProductBaseInfo()->name << endl;
 
 		endProductStock.push_back(finishedProduct);
 		productInProduction = nullptr;
@@ -354,6 +357,7 @@ void WCompany::TryUpgradeResearchLevel(shared_ptr<WelfareState> welfareState)
 
 	researchLevel++;
 
+	cout << "        Company n " << id << " upgraded to the Research Level " << researchLevel << endl;
 
 	nbMaxEmploye += WConstants::EMPLOYE_AMOUNT_UPGRADE_RESEARCH;
 	productivityEmploye += WConstants::EMPLOYE_PRODUCTIVITY_UPGRADE_RESEARCH;
@@ -464,13 +468,25 @@ void WCompany::TrySellDirectlyToWelfareState(shared_ptr<WelfareState> welfareSta
 	if (productBaseInfo->GetProductTreeState() != ProductTreeState::EndProductTop)
 		return;
 
+	int totalQuantity = 0;
+	int totalTotalPrice = 0;
+	string productName = "";
+
 	for (shared_ptr<WProduct> productToSell : endProductStock)
 	{
 		int quantity = productToSell->GetQuantity();
+		totalQuantity += quantity;
+
 		float totalPrice = productToSell->GetPrice(quantity);
+		totalTotalPrice += totalPrice;
 
 		capital += welfareState->SellEndProduct(totalPrice);
 	}
+
+	if (totalQuantity == 0)
+		return;
+
+	cout << "        WelfareState has just bought  " << totalQuantity << "x " << productBaseInfo->name << "for " << totalTotalPrice << "€." << endl;
 
 	endProductStock.clear();
 }
