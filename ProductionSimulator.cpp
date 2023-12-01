@@ -23,7 +23,9 @@ int main()
     dw_ptr->buy();
     dw_ptr->printProduct();
     std::cout << dw_ptr->getWallet() << std::endl;
-
+    
+    //dw_ptr->produceProduct();
+    //dw_ptr->produceProduct();
 
     /*
     std::shared_ptr<EventSeller> es_ptr = std::shared_ptr<EventSeller>(new EventSeller());
