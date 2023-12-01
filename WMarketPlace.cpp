@@ -33,8 +33,11 @@ void WMarketPlace::ExecuteDailyOperations()
 	RetrieveEndProductsStocks();
 	RetrievePurchasingWishes();
 
+	DisplayMarketPlace();
+
 	ExecuteCompanyDeals();
 }
+
 
 void WMarketPlace::AddToMarket(shared_ptr<WProductBaseInfo> productBaseInfo, list<shared_ptr<WProduct>> endproductStock)
 {
@@ -102,6 +105,61 @@ void WMarketPlace::RetrievePurchasingWishes()
 
 		AddPurchasingWishesCompany(purchasingWishesCompany);
 	}
+}
+
+
+void WMarketPlace::DisplayProductMarket(shared_ptr<WProductBaseInfo> productInfo, int nbAvailablesProducts, int nbWishes)
+{
+	string productName = productInfo->name;
+
+	if(nbWishes)
+	cout << "|" << setw(33) << productName << "|" << setw(12) << nbAvailablesProducts  << "|" << setw(12) << nbWishes << "|" << endl;
+	cout << "|---------------------------------|------------|------------|" << endl;
+}
+
+void WMarketPlace::DisplayMarketPlace()
+{
+	map<shared_ptr<WProductBaseInfo>, bool> calculatedProducts;
+	
+	cout << "|-----------------------------------------------------------|" << endl;
+	cout << "|                           ORDER BOOK                      |" << endl;
+	cout << "|-----------------------------------------------------------|" << endl;
+	cout << "|         Product name            |   Offers   |   Demand   |" << endl;
+	cout << "|                                 |            |            |" << endl;
+	cout << "|---------------------------------|------------|------------|" << endl;
+
+	for (pair<shared_ptr<WProductBaseInfo>, list<shared_ptr<WProduct>>> productStock : marketStocks)
+	{
+		shared_ptr<WProductBaseInfo> productBaseInfo = productStock.first;
+		list<shared_ptr<WProduct>> products = productStock.second;
+	
+		calculatedProducts[productBaseInfo] = true;
+	
+		int nbProducts = CountNbProducts(products);
+		int nbWishes = CountWishesInMarket(productBaseInfo);
+	
+		DisplayProductMarket(productBaseInfo, nbProducts, nbWishes);
+	}
+	
+	// Handle the wishes that don't have any stock
+	for (pair<shared_ptr<WProductBaseInfo>, list<shared_ptr<WPurchasingWish>>> purchasingWishesByProduct : purchasingWishesByProducts)
+	{
+		shared_ptr<WProductBaseInfo> productBaseInfo = purchasingWishesByProduct.first;
+
+		if (calculatedProducts.count(productBaseInfo))
+			continue;
+
+		calculatedProducts[productBaseInfo] = true;
+
+		list<shared_ptr<WPurchasingWish>> purchasingWish = purchasingWishesByProduct.second;
+
+		int nbProducts = 0;
+		int nbWishes = CountWishesInMarket(productBaseInfo);
+
+		DisplayProductMarket(productBaseInfo, nbProducts, nbWishes);
+	}
+
+	cout << "-------------------------------------------------------------" << endl;
 }
 
 void WMarketPlace::ExecuteCompanyDeals()
@@ -249,6 +307,9 @@ void WMarketPlace::ExecuteCompanyDealsByProduct(shared_ptr<WProductBaseInfo> pro
 	// Security while
 	int failedAttempt = 3;
 
+	// Allow to gather sames type of purchases for a better display in the console
+	map<shared_ptr<WCompany>, pair<float, float>> purchasesToDisplay;
+
 	while (purchasingWishes.size() > 0 && marketStock.size() > 0 && failedAttempt > 0)
 	{
 		uniform_int_distribution<>distrib(0, purchasingWishes.size() - 1);
@@ -304,8 +365,14 @@ void WMarketPlace::ExecuteCompanyDealsByProduct(shared_ptr<WProductBaseInfo> pro
 			buyingCompany->AddToRawStock(productBaseInfo, possibleExtractedProduct);
 			possibleExtractedProduct->SetNewDeltaCompanyPricePerUnitFromPurchase(totalPriceToPayForBuyer);
 
-			cout << "		Company n " << buyingCompany->id << " just bought " << possibleExtractedProduct->GetQuantity() << "x " << productBaseInfo->name << " for " << totalPriceToPayForBuyer << " euros." << endl;
+			pair<float, float> quantityAndPrice(0.0f, 0.0f);
 
+			if (purchasesToDisplay.count(buyingCompany))
+				quantityAndPrice = purchasesToDisplay[buyingCompany];
+
+			quantityAndPrice.first += possibleExtractedProduct->GetQuantity();
+			quantityAndPrice.second += totalPriceToPayForBuyer;
+			purchasesToDisplay[buyingCompany] = quantityAndPrice;
 		}
 		else
 		{
@@ -313,8 +380,14 @@ void WMarketPlace::ExecuteCompanyDealsByProduct(shared_ptr<WProductBaseInfo> pro
 			buyingCompany->AddToRawStock(productBaseInfo, productToPurchase);
 			productToPurchase->SetNewDeltaCompanyPricePerUnitFromPurchase(totalPriceToPayForBuyer);
 
-			cout << "		Company n " << buyingCompany->id << " just bought " << productToPurchase->GetQuantity() << "x " << productBaseInfo->name << " for " << totalPriceToPayForBuyer << " euros." << endl;
+			pair<float, float> quantityAndPrice(0.0f, 0.0f);
 
+			if (purchasesToDisplay.count(buyingCompany))
+				quantityAndPrice = purchasesToDisplay[buyingCompany];
+
+			quantityAndPrice.first += productToPurchase->GetQuantity();
+			quantityAndPrice.second += totalPriceToPayForBuyer;
+			purchasesToDisplay[buyingCompany] = quantityAndPrice;
 		}
 
 		// TODO : here transaction registering
@@ -334,5 +407,14 @@ void WMarketPlace::ExecuteCompanyDealsByProduct(shared_ptr<WProductBaseInfo> pro
 		{
 			purchasingWishes.remove(selectedPurchasingWish);
 		}
+	}
+
+
+	for (pair<shared_ptr<WCompany>, pair<float, float>> purchase : purchasesToDisplay)
+	{
+		shared_ptr<WCompany> company = purchase.first;
+		pair<float, float> quantityAndPrice = purchase.second;
+
+		cout << "		Company n " << company->id << " just bought " << quantityAndPrice.first << "x " << productBaseInfo->name << " for " << quantityAndPrice.second << " euros." << endl;
 	}
 }

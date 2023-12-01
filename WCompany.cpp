@@ -39,7 +39,7 @@ shared_ptr<WProductBaseInfo> WCompany::GetProductBaseInfo()
 
 int WCompany::GetNbOfPossibleProductToBuild()
 {
- 	int unitWorkProduct = productBaseInfo->employeDayUnit;
+  	int unitWorkProduct = productBaseInfo->employeDayUnit;
 	int nbOfPossibleProductToBuild = (nbEmploye * productivityEmploye) / unitWorkProduct;
 
 	if (nbOfPossibleProductToBuild == 0 && nbEmploye > 0) // Force employes to work more than one day
@@ -238,19 +238,24 @@ void WCompany::ExecuteEmployeWork(shared_ptr<WCompany> thisCompany)
 
 	remainingWorkForceToFinishProduct -= remainingEmployeWorkForceOfTheday;
 
+	int totalQuantity = 0;
 
 	while (remainingWorkForceToFinishProduct <= 0)
 	{
 		// Product Finished
 		shared_ptr<WProduct> finishedProduct = productInProduction->first;
 
-		cout << "		Company n " << thisCompany->id << " has just produced " << finishedProduct->GetQuantity() << "x " << thisCompany->GetProductBaseInfo()->name << endl;
+		totalQuantity += finishedProduct->GetQuantity();
 
 		endProductStock.push_back(finishedProduct);
 		productInProduction = nullptr;
 
 		if (!TryStartNewProduction(thisCompany))
+		{
+			if (totalQuantity > 0)
+				cout << "		Company n " << thisCompany->id << " has just produced " << totalQuantity << "x " << thisCompany->GetProductBaseInfo()->name << endl;
 			return;
+		}
 
 
 		// Surplus of the remainingWorkForceToFinishProduct represent the remaining amount of the remainingEmployeWorkForceOfTheday
@@ -259,6 +264,9 @@ void WCompany::ExecuteEmployeWork(shared_ptr<WCompany> thisCompany)
 		remainingWorkForceToFinishProduct = productInProduction->second;
 		remainingWorkForceToFinishProduct -= remainingEmployeWorkForceOfTheday;
 	}
+
+	if(totalQuantity > 0)
+		cout << "		Company n " << thisCompany->id << " has just produced " << totalQuantity << "x " << thisCompany->GetProductBaseInfo()->name << endl;
 
 	productInProduction->second = remainingWorkForceToFinishProduct;
 	return;

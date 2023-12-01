@@ -44,7 +44,7 @@ void WEconomy::IncrementDay()
 {
 	currentDate->tm_mday++;
 	mktime(currentDate.get());
-
+	system("cls");
 	cout << "New Day : " << currentDate->tm_mday << "/" << currentDate->tm_mon + 1 << "/" << currentDate->tm_year + 1900 << endl;
 
 	bool isFirstOfTheMonth = (currentDate->tm_mday == 1);

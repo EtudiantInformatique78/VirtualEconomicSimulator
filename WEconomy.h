@@ -12,6 +12,7 @@
 #include <sstream>
 #include <windows.h>
 
+
 class WelfareState;
 class WMarketPlace;
 

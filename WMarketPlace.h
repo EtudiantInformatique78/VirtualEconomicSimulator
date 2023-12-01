@@ -9,6 +9,7 @@
 #include "WConstants.h"
 #include "WEconomy.h"
 #include "WPriceDetailsPerUnit.h"
+#include <iomanip> 
 #include <limits>
 
 class WEconomy;
@@ -40,6 +41,9 @@ public:
 
 	void RetrieveEndProductsStocks();
 	void RetrievePurchasingWishes();
+
+	void DisplayMarketPlace();
+	void DisplayProductMarket(shared_ptr<WProductBaseInfo> productInfo, int nbAvailablesProducts, int nbWishes);
 
 	void AddToMarket(shared_ptr<WProductBaseInfo> productBaseInfo, list<shared_ptr<WProduct>> endproductStock);
 	void AddPurchasingWishesCompany(shared_ptr<list<shared_ptr<WPurchasingWish>>> purchasingWishesCompany);
