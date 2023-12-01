@@ -32,7 +32,32 @@ int main()
     {
         std::cout << *(*it) << std::endl;
     }
+
+
+    std::shared_ptr<Company> ic_ptr = std::shared_ptr<IronCoreCompany>(new IronCoreCompany("Montgomery's Iron Core"));
+    ic_ptr->produceProduct();
+    ic_ptr->printProduct();
+
+    std::shared_ptr<Company> i_ptr = std::shared_ptr<IronCompany>(new IronCompany("Barret's Iron"));
+
+    std::shared_ptr<IronCoreCompany> dic_ptr = std::dynamic_pointer_cast<IronCoreCompany>(ic_ptr);
+    std::shared_ptr<IronCompany> di_ptr = std::dynamic_pointer_cast<IronCompany>(i_ptr);
+    di_ptr->subscribeToACompany(*dic_ptr.get());
+    di_ptr->buy();
+    //di_ptr->printProduct();
+    /*
+
+    std::cout << di_ptr->getWallet() << std::endl;
+    di_ptr->produceProduct();
     
+    pr = di_ptr->getProductMade();
+    for (it = pr.begin(); it != pr.end(); ++it)
+    {
+        std::cout << *(*it) << std::endl;
+    }
+    */
+    
+
     //dw_ptr->produceProduct();
 
     /*

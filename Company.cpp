@@ -109,8 +109,16 @@ void RawMaterialCompany::produceProduct()
 /*******************************
 *  transformedMaterialCompany  *
 ********************************/
-transformedMaterialCompany::transformedMaterialCompany(std::string name) : Company(name) {};
-transformedMaterialCompany::~transformedMaterialCompany() {};
+transformedMaterialCompany::transformedMaterialCompany(std::string name) : Company(name)
+{
+	this->productMade = std::vector<std::shared_ptr<Product>>();
+};
+transformedMaterialCompany::~transformedMaterialCompany() {}
+std::vector<std::shared_ptr<Product>> transformedMaterialCompany::getProductMade()
+{
+	return this->productMade;
+}
+;
 
 
 
@@ -118,6 +126,20 @@ transformedMaterialCompany::~transformedMaterialCompany() {};
 
 
 
+
+
+/*****************************
+*        BuyerCompany        *
+******************************/
+std::shared_ptr<EventBuyer> BuyerCompany::getEventBuyer()
+{
+	return this->eb;
+}
+
+void BuyerCompany::subscribeToACompany(SellerCompany& sc)
+{
+	this->eb->subscribe(sc.getEventSeller());
+}
 
 void BuyerCompany::buy()
 {
@@ -142,6 +164,22 @@ TreeCompany::~TreeCompany(){}
 
 
 
+
+
+/********************
+*  IronCoreCompany  *
+*********************/
+IronCoreCompany::IronCoreCompany(std::string name) : RawMaterialCompany(name)
+{
+	this->factory = std::shared_ptr<IronFactory>(new IronFactory());
+}
+
+IronCoreCompany::~IronCoreCompany(){}
+
+
+
+
+
 /********************
 *    WoodCompany    *
 *********************/
@@ -149,10 +187,43 @@ WoodCompany::WoodCompany(std::string the_name) : transformedMaterialCompany(the_
 {
 	this->ptr_builder = std::shared_ptr<MakeWood>(new MakeWood());
 	this->eb = std::shared_ptr<EventBuyer>(new EventBuyer(*this));
-	this->productMade = std::vector<std::shared_ptr<Product>>();
+	
 }
 
-void WoodCompany::subscribeToACompany(SellerCompany& sc)
+void WoodCompany::produceProduct()
 {
-	this->eb->subscribe(sc.getEventSeller());
+	this->ptr_builder->reset();
+	this->ptr_builder->Build(stockInit);
+	std::shared_ptr<Product> prod_ptr = this->ptr_builder->getResult();
+	if(prod_ptr != nullptr)
+	{
+		productMade.push_back(prod_ptr);
+	}
+}
+
+
+
+
+
+
+
+/********************
+*    IronCompany    *
+*********************/
+IronCompany::IronCompany(std::string the_name) : transformedMaterialCompany(the_name)
+{
+	this->ptr_builder = std::shared_ptr<MakeIron>(new MakeIron());
+	this->eb = std::shared_ptr<EventBuyer>(new EventBuyer(*this));
+	//this->productMade = std::vector<std::shared_ptr<Product>>();
+}
+
+void IronCompany::produceProduct()
+{
+	this->ptr_builder->reset();
+	this->ptr_builder->Build(stockInit);
+	std::shared_ptr<Product> prod_ptr = this->ptr_builder->getResult();
+	if (prod_ptr != nullptr)
+	{
+		productMade.push_back(prod_ptr);
+	}
 }

@@ -71,9 +71,13 @@ class transformedMaterialCompany : public Company
 {
 protected:
 	std::shared_ptr<IBuilder> ptr_builder;
+	std::vector<std::shared_ptr<Product>> productMade;
 public:
 	transformedMaterialCompany(std::string name);
 	~transformedMaterialCompany();
+
+	std::vector<std::shared_ptr<Product>> getProductMade();
+
 };
 
 
@@ -91,19 +95,29 @@ public:
 };
 
 
+
+
+
+
+/*****************************
+*        BuyerCompany        *
+******************************/
 class BuyerCompany
 {
 protected:
 	std::shared_ptr<EventBuyer> eb;
 public:
-	std::shared_ptr<EventBuyer> getEventBuyer()
-	{
-		return eb;
-	}
-
+	// Getter
+	std::shared_ptr<EventBuyer> getEventBuyer();
+	
+	// Method
+	void subscribeToACompany(SellerCompany& sc);
 	void buy();
 
 };
+
+
+
 
 
 
@@ -119,16 +133,24 @@ public:
 
 };
 
-class IronCompany : public RawMaterialCompany, public IronPublisher
+
+
+
+
+
+
+
+/********************
+*  IronCoreCompany  *
+*********************/
+class IronCoreCompany : public RawMaterialCompany, public SellerCompany
 {
 public:
-	IronCompany(std::string name) : RawMaterialCompany(name)
-	{
-		this->factory = std::shared_ptr<IronFactory>(new IronFactory());
-	};
-	~IronCompany() {};
-
+	IronCoreCompany(std::string name);
+	~IronCoreCompany();
 };
+
+
 
 
 
@@ -139,34 +161,30 @@ public:
 *********************/
 class WoodCompany : public transformedMaterialCompany, public BuyerCompany
 {
-//private:
-//	std::shared_ptr<EventBuyer> eb;
-
-private:
-	std::vector<std::shared_ptr<Product>> productMade;
 public:
 	WoodCompany(std::string the_name);
 
-	// Getter
-	std::vector<std::shared_ptr<Product>> getProductMade()
-	{
-		return this->productMade;
-	}
-	
-	
 	// Method
-	void subscribeToACompany(SellerCompany& sc);
-	void produceProduct()
-	{
-		/*
-		I try to figure out
-		*/
-		ptr_builder->reset();
-		ptr_builder->Build(stockInit);
-		std::shared_ptr<Product> prod_ptr = ptr_builder->getResult();
-		if(prod_ptr != nullptr)
-		{
-			productMade.push_back(prod_ptr);
-		}
-	}
+	void produceProduct() override;
+	
+};
+
+
+
+
+
+
+
+
+/********************
+*    IronCompany    *
+*********************/
+class IronCompany : public transformedMaterialCompany, public BuyerCompany
+{
+public:
+	IronCompany(std::string the_name);
+
+	// Method
+	void produceProduct() override;
+
 };
