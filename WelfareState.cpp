@@ -1,15 +1,21 @@
 
 #include "WelfareState.h"
 
-WelfareState::WelfareState(shared_ptr<WEconomy> _economy) : economy(economy)
+WelfareState::WelfareState()
 {
 	salaryPool = 0;
 	transportationPool = 0;
+	researchPool = 0;
 }
 
 WelfareState::~WelfareState()
 {
 
+}
+
+void WelfareState::SetEconomy(shared_ptr<WEconomy> _economy)
+{
+	economy = _economy;
 }
 
 
@@ -23,12 +29,17 @@ void WelfareState::PayTransportation(float value)
 	transportationPool += value;
 }
 
+void WelfareState::PayResearch(float value)
+{
+	researchPool += value;
+}
+
 void WelfareState::DistributeMoney()
 {
 	list<shared_ptr<WCompany>> companies = economy->GetCompanies();
 	int nbCompanies = companies.size();
 
-	float giveOut = (salaryPool / nbCompanies) + (transportationPool / nbCompanies);
+	float giveOut = (salaryPool / nbCompanies) + (transportationPool / nbCompanies) + (researchPool / nbCompanies);
 	
 	for (shared_ptr<WCompany> company : companies)
 	{
@@ -37,4 +48,5 @@ void WelfareState::DistributeMoney()
 
 	salaryPool = 0;
 	transportationPool = 0;
+	researchPool = 0;
 }

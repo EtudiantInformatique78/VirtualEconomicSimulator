@@ -1,14 +1,21 @@
 #include "WCompany.h"
 
-WCompany::WCompany(shared_ptr<WProductBaseInfo> _productBaseInfo, pair<int,int> _position)
+
+WCompany::WCompany(int _id, shared_ptr<WProductBaseInfo> _productBaseInfo, pair<int,int> _position) 
+	: id(_id), position(_position), productBaseInfo(_productBaseInfo)
 {
 	capital = WConstants::COMPANY_START_CAPITAL;
+	nbMaxEmploye = WConstants::NB_EMPLOYE_START;
 	nbEmploye = WConstants::NB_EMPLOYE_START;
 	salaryEmploye = WConstants::SALARY_EMPLOYE_START;
-	rAndDLevel = 1;
-	position = _position;
+	researchLevel = 1;
 
-	productBaseInfo = _productBaseInfo;
+	productivityEmploye = 1;
+
+	productInProduction = nullptr;
+
+	margin = _productBaseInfo->baseMargin;
+	productionCost = _productBaseInfo->baseProductionCost;
 }
 
 WCompany::~WCompany()
@@ -16,11 +23,7 @@ WCompany::~WCompany()
 
 }
 
-
-void WCompany::ApplyWorkDay()
-{
-	// TODO : ApplyWorkDay
-}
+#pragma region Getters
 
 list<shared_ptr<WProduct>> WCompany::GetEndProductStock()
 {
@@ -34,15 +37,11 @@ shared_ptr<WProductBaseInfo> WCompany::GetProductBaseInfo()
 
 int WCompany::GetNbOfPossibleProductToBuild()
 {
-	if (nbAvailableEmploye == 0)
-		return 0;
-
-	int unitWork = productBaseInfo->employeDayUnit;
-	int nbOfPossibleProductToBuild = unitWork / nbAvailableEmploye;
+	int unitWorkProduct = productBaseInfo->employeDayUnit;
+	int nbOfPossibleProductToBuild = (nbEmploye * productivityEmploye) / unitWorkProduct;
 
 	return nbOfPossibleProductToBuild;
 }
-
 
 shared_ptr<list<shared_ptr<WPurchasingWish>>> WCompany::GetPurchasingWishes(shared_ptr<WCompany> thisPtr)
 {
@@ -68,6 +67,285 @@ shared_ptr<list<shared_ptr<WPurchasingWish>>> WCompany::GetPurchasingWishes(shar
 	return listWishes;
 }
 
+int WCompany::GetQuantityRawProductInStock(shared_ptr<WProductBaseInfo> productBaseInfo)
+{
+	if (!rawStock.count(productBaseInfo))
+		return 0;
+
+	shared_ptr<list<shared_ptr<WProduct>>> rawStockProduct = rawStock[productBaseInfo];
+
+	int quantity = 0;
+
+	for (shared_ptr<WProduct> product : *rawStockProduct)
+	{
+		quantity += product->GetQuantity();
+	}
+
+	return quantity;
+}
+
+bool WCompany::RemoveFromRawStock(shared_ptr<WProductBaseInfo> productBaseInfo, int quantityToRemove)
+{
+	if (!rawStock.count(productBaseInfo))
+		return false;
+
+	shared_ptr<list<shared_ptr<WProduct>>> rawStockProduct = rawStock[productBaseInfo];
+	list<shared_ptr<WProduct>> productToRemoveFromStock;
+
+	bool stockIsEmpty = false;
+
+	// Remove product until enough quantity has been removed
+	for (shared_ptr<WProduct> product : *rawStockProduct)
+	{
+		int quantityInProduct = product->GetQuantity();
+
+		if (quantityToRemove < quantityInProduct)
+		{
+			shared_ptr<WProduct> extractedProduct = product->Extract(quantityToRemove);
+			quantityToRemove = 0;
+			// TODO : register extraction from raw stock
+			break;
+		}
+		
+		if (quantityToRemove == quantityInProduct)
+		{
+			productToRemoveFromStock.push_back(product);
+			quantityToRemove = 0;
+			break;
+		}
+
+		// quantityToRemove > quantityInProduct
+		quantityToRemove -= quantityInProduct;
+		productToRemoveFromStock.push_back(product);
+	}
+
+	if (quantityToRemove != 0) // Couldn't remove enough product
+		return false;
+
+	// Remove the removedProducts from the rawStock
+	for (shared_ptr<WProduct> productToRemove : productToRemoveFromStock)
+	{
+		rawStockProduct->remove(productToRemove);
+	}
+
+
+	return true;
+}
+
+#pragma endregion
+
+
+#pragma region DailyOperations
+void WCompany::ExecuteDailyOperations(bool isFirstOfTheMonth, shared_ptr<WCompany> thisCompany, shared_ptr<WelfareState> welfareState)
+{
+	if (isFirstOfTheMonth)
+	{
+		PaySalaries(welfareState);
+		TryRecrutEmploye();
+	}
+
+	ExecuteEmployeWork(thisCompany);
+
+	TryUpgradeResearchLevel(welfareState);
+}
+
+void WCompany::PaySalaries(shared_ptr<WelfareState> welfareState)
+{
+	float salariesCost = nbEmploye * salaryEmploye;
+
+	capital -= salariesCost;
+
+	if (capital < 0.0f)
+	{
+		float realPayment = capital * -1.0f;
+		capital = 0.0f;
+		welfareState->PaySalaries(realPayment);
+
+		int nbOfUnpaidSalary = (salariesCost - realPayment) / salaryEmploye;
+		random_device rd;
+		mt19937 gen(rd());
+		bernoulli_distribution dist(0.5);
+		
+
+		for (int i = 0; i < nbOfUnpaidSalary; i++)
+		{
+			if (dist(gen)) // 1/2 chance that the employe leave
+				nbEmploye--;
+		}
+
+		return;
+	}
+
+	welfareState->PaySalaries(salariesCost);
+}
+
+void WCompany::TryRecrutEmploye()
+{
+	if (nbEmploye == nbMaxEmploye)
+		return;
+
+	// Can hire only if the total payroll is less than 10% of the capital
+
+	float totalSalaries = nbEmploye * salaryEmploye;
+	bool wantToHire = (totalSalaries / capital) < .1f;
+
+	while (wantToHire)
+	{
+		if (nbEmploye + 1 > nbMaxEmploye)
+		{
+			wantToHire = false;
+			continue;
+		}
+
+		// Hire employe
+		nbEmploye++;
+
+		totalSalaries = nbEmploye * salaryEmploye;
+		wantToHire = (totalSalaries / capital) < .1f;
+	}
+}
+
+void WCompany::ExecuteEmployeWork(shared_ptr<WCompany> thisCompany)
+{
+	float productEmployeDayUnit = productBaseInfo->employeDayUnit;
+	float remainingEmployeWorkForceOfTheday = nbEmploye * productivityEmploye; 
+
+	if (productInProduction == nullptr)
+		TryStartNewProduction(thisCompany);
+
+	float remainingWorkForceToFinishProduct = productInProduction->second;
+
+	remainingWorkForceToFinishProduct -= remainingEmployeWorkForceOfTheday;
+
+
+	while (remainingWorkForceToFinishProduct <= 0)
+	{
+		// Product Finished
+		shared_ptr<WProduct> finishedProduct = productInProduction->first;
+		endProductStock.push_back(finishedProduct);
+		productInProduction = nullptr;
+
+		if (!TryStartNewProduction(thisCompany))
+			return;
+
+
+		// Surplus of the remainingWorkForceToFinishProduct represent the remaining amount of the remainingEmployeWorkForceOfTheday
+		remainingEmployeWorkForceOfTheday = remainingWorkForceToFinishProduct * -1.0f;
+
+		remainingWorkForceToFinishProduct = productInProduction->second;
+		remainingWorkForceToFinishProduct -= remainingEmployeWorkForceOfTheday;
+	}
+
+	productInProduction->second = remainingWorkForceToFinishProduct;
+	return;
+}
+
+
+bool WCompany::TryStartNewProduction(shared_ptr<WCompany> thisCompany)
+{
+	float productEmployeDayUnit = productBaseInfo->employeDayUnit;
+	float employeWorkForceOfTheday = nbEmploye * productivityEmploye;
+
+	float quantityF = productEmployeDayUnit / employeWorkForceOfTheday;
+	int wishQuantity = (quantityF < 1.0f) ? 1 : quantityF;
+
+	int quantity = RetrieveRawProductsToBeginProduction(wishQuantity);
+
+	if (quantity == 0)
+		return false;
+
+	float daySpentOnProduct = productEmployeDayUnit / productivityEmploye;
+	float salaryCostPerDay = salaryEmploye / 31.0f; // 31 is number of day in a month
+	float salaryCostPerProduct = daySpentOnProduct * salaryCostPerDay;
+
+	float deltaCompanyPricePerUnit = (salaryCostPerProduct * quantity + productionCost) * (1 + margin) / quantity;
+
+	shared_ptr<WProduct> product = make_shared<WProduct>(deltaCompanyPricePerUnit, quantity, thisCompany);
+	productInProduction = make_shared<pair<shared_ptr<WProduct>, float>>(product, productBaseInfo->employeDayUnit * quantity);
+	
+	return true;
+}
+
+int WCompany::RetrieveRawProductsToBeginProduction(int wishQuantity)
+{
+	int minimumAvailableRessourceProduct = INT_MAX;
+
+	map<shared_ptr<WProductBaseInfo>, int> compositionProductToProduce = productBaseInfo->composition;
+
+
+	// Get the maximum amount of product that can be produced
+	for (pair<shared_ptr<WProductBaseInfo>, int> material : compositionProductToProduce)
+	{
+		shared_ptr<WProductBaseInfo> productMaterial = material.first;
+		int requiredQuantityForOne = material.second;
+
+		int nbAvailableProductMaterial = GetQuantityRawProductInStock(productMaterial);
+
+		int maxAvailableQuantityForProductMaterial = nbAvailableProductMaterial / requiredQuantityForOne;
+
+		if (maxAvailableQuantityForProductMaterial < minimumAvailableRessourceProduct)
+			minimumAvailableRessourceProduct = maxAvailableQuantityForProductMaterial;
+	}
+
+	int quantityToRetrieve = (minimumAvailableRessourceProduct > wishQuantity) ? wishQuantity : minimumAvailableRessourceProduct;
+	
+	if (quantityToRetrieve == 0)
+		return 0;
+
+	// Remove the raw products from stock
+	for (pair<shared_ptr<WProductBaseInfo>, int> material : compositionProductToProduce)
+	{
+		shared_ptr<WProductBaseInfo> productMaterial = material.first;
+		int requiredQuantityForOne = material.second;
+
+		RemoveFromRawStock(productMaterial, requiredQuantityForOne * quantityToRetrieve);
+	}
+
+	return quantityToRetrieve;
+}
+
+
+void WCompany::TryUpgradeResearchLevel(shared_ptr<WelfareState> welfareState)
+{
+	float upgradeCost = WConstants::BASE_UPGRADE_COST_RESEARCH * WConstants::UPGRADE_RATIO_COST_RESEARCH * researchLevel;
+
+	float ratio = upgradeCost / capital;
+
+	if (ratio > WConstants::MINIMUM_PERCENT_TO_UPGRADE_RESEARCH)
+		return;
+
+	// Upgrade Research
+	capital -= upgradeCost;
+	welfareState->PayResearch(upgradeCost);
+
+	researchLevel++;
+
+
+	nbMaxEmploye += WConstants::EMPLOYE_AMOUNT_UPGRADE_RESEARCH;
+	productivityEmploye += WConstants::EMPLOYE_PRODUCTIVITY_UPGRADE_RESEARCH;
+
+	margin *= WConstants::MARGIN_RATIO_RESEARCH;
+
+	float halfBaseMargin = productBaseInfo->baseMargin * .5f;
+
+	if (margin < halfBaseMargin)
+		margin = halfBaseMargin;
+
+	productionCost *= WConstants::FABRICATION_COST_RATIO_RESEARCH;
+
+	float halfProductionCost = productBaseInfo->baseProductionCost * .5f;
+
+	if (productionCost < halfProductionCost)
+		productionCost = halfProductionCost;
+
+}
+
+
+#pragma endregion
+
+
+#pragma region TransactionMarket
+
 void WCompany::ReceiveMoney(float amount)
 {
 	capital += amount;
@@ -82,3 +360,75 @@ float WCompany::GetDistanceFrom(shared_ptr<WCompany> company)
 
 	return 5.0f;
 }
+
+bool WCompany::CanPay(float amount)
+{
+	return amount <= capital;
+}
+
+bool WCompany::AttemptDeductionPayment(float amount)
+{
+	if (amount > capital)
+		return false;
+
+	capital -= amount;
+
+	return true;
+}
+
+
+shared_ptr<WProduct> WCompany::AttemptBuyProduct(bool& succeedBuying, shared_ptr<WProduct> product, float totalPrice, int quantity)
+{
+	bool inStock = false;
+	succeedBuying = false;
+
+	for (shared_ptr<WProduct> productInList : endProductStock)
+	{
+		if (productInList != product)
+			continue;
+
+		inStock = true;
+		break;
+	}
+
+	if (!inStock)
+		return nullptr;
+
+	succeedBuying = true;
+
+	capital += totalPrice;
+
+	if (product->GetQuantity() >= quantity)
+	{
+		endProductStock.remove(product);
+		return nullptr;
+	}
+
+	// quantity < stock
+	shared_ptr<WProduct> extractedProduct = product->Extract(quantity);
+
+	return extractedProduct;
+}
+#pragma endregion
+
+
+void WCompany::AddToRawStock(shared_ptr<WProductBaseInfo> productBaseInfo, shared_ptr<WProduct> productToAdd)
+{
+	if (!rawStock.count(productBaseInfo))
+	{
+		shared_ptr<list<shared_ptr<WProduct>>> products = make_shared<list<shared_ptr<WProduct>>>();
+		products->push_back(productToAdd);
+		rawStock[productBaseInfo] = products;
+		return;
+	}
+
+	rawStock[productBaseInfo]->push_back(productToAdd);
+}
+
+
+
+// TODO : first products auto regule
+
+// TODO : price cost material in output product
+
+// TODO : welfareState buy last product

@@ -3,13 +3,15 @@
 
 WProductBaseInfoBuilder::WProductBaseInfoBuilder()
 {
+	id = -1;
 	name = "";
 	basePrice = -1;
-	baseRate = -1;
 	baseMargin = -1;
 	employeDayUnit = -1;
-	fabricationCost = -1;
-	transportationCostPerkm = -1;
+	baseProductionCost = -1;
+	transportationCostPerkmPerUnit = -1;
+
+	composition = "";
 }
 
 

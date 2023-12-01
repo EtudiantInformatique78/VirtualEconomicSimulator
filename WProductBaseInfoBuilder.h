@@ -4,19 +4,19 @@
 class WProductBaseInfoBuilder
 {
 public:
+	int id;
 	string name;
 
 	float basePrice;
-	float baseRate;
 	float baseMargin;
 
+	float baseProductionCost;
 	int employeDayUnit;
-	float fabricationCost;
 
-	/// <summary>
-	/// Per kms
-	/// </summary>
-	float transportationCostPerkm;
+
+	float transportationCostPerkmPerUnit;
+
+	string composition;
 
 	WProductBaseInfoBuilder();
 	~WProductBaseInfoBuilder();

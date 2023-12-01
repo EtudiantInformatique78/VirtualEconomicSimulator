@@ -12,13 +12,13 @@ private:
 
 public:
 
-	const float deltaCompanyPrice;
+	const float deltaCompanyPricePerUnit;
 	const shared_ptr<WCompany> company;
 
-	WProduct(float _price, int _quantity, shared_ptr<WCompany> company);
+	WProduct(float _deltaCompanyPricePerUnit, int _quantity, shared_ptr<WCompany> company);
 	~WProduct();
 
-	float GetPrice();
+	float GetPrice(int quantity);
 	int GetQuantity();
 
 	shared_ptr<WProduct> Extract(int quantity);

@@ -1,6 +1,6 @@
 #include "WMarketPlace.h"
 
-WMarketPlace::WMarketPlace(shared_ptr<WEconomy> _economy) : economy(_economy)
+WMarketPlace::WMarketPlace()
 {
 
 }
@@ -8,6 +8,11 @@ WMarketPlace::WMarketPlace(shared_ptr<WEconomy> _economy) : economy(_economy)
 WMarketPlace::~WMarketPlace()
 {
 
+}
+
+void WMarketPlace::SetEconomy(shared_ptr<WEconomy> _economy)
+{
+	economy = _economy;
 }
 
 void WMarketPlace::Add(shared_ptr<WCompany> newCompany)
@@ -177,66 +182,120 @@ void WMarketPlace::CalculateNewProductsRates()
 	}
 }
 
-pair<shared_ptr<WProduct>, float> WMarketPlace::GetCheapestProduct(shared_ptr<WPurchasingWish> purchasingWish, list<shared_ptr<WProduct>>& marketStock)
+pair<shared_ptr<WProduct>, shared_ptr<WPriceDetailsPerUnit>> WMarketPlace::GetCheapestProduct(shared_ptr<WPurchasingWish> purchasingWish, list<shared_ptr<WProduct>>& marketStock)
 {
 	shared_ptr<WProductBaseInfo> productBaseInfo = purchasingWish->product;
 	shared_ptr<WCompany> companyThatPurchase = purchasingWish->company;
 
+	shared_ptr<WPriceDetailsPerUnit> priceDetails = make_shared<WPriceDetailsPerUnit>(.0f, .0f, .0f);
+
 	shared_ptr<WProduct> cheapestProduct = nullptr;
-	float cheapestPrice = numeric_limits<float>::max();
+	float cheapestPrice = 99999999999999999999999999999999999999.9999999999f;
 
 	for (shared_ptr<WProduct> product : marketStock)
 	{
-		float distanceBetweenCompanies = companyThatPurchase->GetDistanceFrom(product->company);
+		float transporationPricePerUnit = companyThatPurchase->GetDistanceFrom(product->company) * productBaseInfo->transportationCostPerKmPerUnit;
 
-		float price = productBaseInfo->GetFloatingPrice() + distanceBetweenCompanies * productBaseInfo->transportationCostPerKm + product->deltaCompanyPrice;
+		float finalPrice = productBaseInfo->GetFloatingPricePerUnit() + transporationPricePerUnit + product->deltaCompanyPricePerUnit;
 
-		if (price > cheapestPrice)
+		if (finalPrice > cheapestPrice)
 			continue;
 
-		cheapestPrice = price;
+		cheapestPrice = finalPrice;
 		cheapestProduct = product;
+
+		priceDetails = make_shared<WPriceDetailsPerUnit>(productBaseInfo->GetFloatingPricePerUnit(), transporationPricePerUnit, product->deltaCompanyPricePerUnit);
 	}
 
-	return pair<shared_ptr<WProduct>, float>(cheapestProduct, cheapestPrice);
+	return pair<shared_ptr<WProduct>, shared_ptr<WPriceDetailsPerUnit>>(cheapestProduct, priceDetails);
 }
 
 
 void WMarketPlace::SelectCompanyDealsByProduct(shared_ptr<WProductBaseInfo> productBaseInfo, list<shared_ptr<WPurchasingWish>> purchasingWishes)
 {
-	float basePrice = productBaseInfo->GetFloatingPrice();
-	float transportationCostPerKm = productBaseInfo->transportationCostPerKm;
+	float basePrice = productBaseInfo->GetFloatingPricePerUnit();
+	float transportationCostPerKm = productBaseInfo->transportationCostPerKmPerUnit;
 
 	list<shared_ptr<WProduct>> marketStock = marketStocks[productBaseInfo];
 	
 	random_device rd;
 	mt19937 gen(rd());
-	uniform_int_distribution<>distrib(0, purchasingWishes.size() - 1);
 
-	shared_ptr<WPurchasingWish> selectedPurchasingWish = *next(purchasingWishes.begin(), distrib(gen));
+	// Security while
+	int failedAttempt = 3;
 
-	pair<shared_ptr<WProduct>, float> buyingProduct = GetCheapestProduct(selectedPurchasingWish, marketStock);
-
-	shared_ptr<WProduct> product = buyingProduct.first;
-
-	shared_ptr<WCompany> buyingCompany = selectedPurchasingWish->company;
-	shared_ptr<WCompany> sellingCompany = product->company;
-
-	float buyingPrice = buyingProduct.second;
-
-	int quantityProduct = product->GetQuantity();
-	int quantityWishes = selectedPurchasingWish->quantity;
-
-	if (quantityWishes > quantityProduct)
+	while (purchasingWishes.size() > 0 && marketStock.size() == 0 && failedAttempt > 0)
 	{
-		purchasingWishes.remove(selectedPurchasingWish);
+		uniform_int_distribution<>distrib(0, purchasingWishes.size() - 1);
+
+		shared_ptr<WPurchasingWish> selectedPurchasingWish = *next(purchasingWishes.begin(), distrib(gen));
+
+		pair<shared_ptr<WProduct>, shared_ptr<WPriceDetailsPerUnit>> cheapestProduct = GetCheapestProduct(selectedPurchasingWish, marketStock);
+
+		shared_ptr<WProduct> productToPurchase = cheapestProduct.first;
+		shared_ptr<WPriceDetailsPerUnit> priceDetails = cheapestProduct.second;
+
+		if (productToPurchase == nullptr)
+		{
+			failedAttempt--;
+			continue;
+		}
+
+		shared_ptr<WCompany> buyingCompany = selectedPurchasingWish->company;
+		shared_ptr<WCompany> sellingCompany = productToPurchase->company;
 
 
+		int nbAvailableProductInStock = productToPurchase->GetQuantity();
+		int nbWishPurchaseProduct = selectedPurchasingWish->quantity;
+
+		int nbProductPurchased = (nbWishPurchaseProduct > nbAvailableProductInStock) ? nbAvailableProductInStock : nbWishPurchaseProduct;
+
+		float paidPriceBetweenCompanies = nbProductPurchased * (priceDetails->floatingPrice + priceDetails->deltaCompanyPrice);
+		float transportationPrice = nbProductPurchased * priceDetails->transportationPrice;
+
+		float totalPrice = paidPriceBetweenCompanies + transportationPrice;
+
+		if (!buyingCompany->CanPay(totalPrice) || !buyingCompany->AttemptDeductionPayment(totalPrice))
+		{
+			failedAttempt--;
+			continue;
+		}
+
+		economy->welfareState->PayTransportation(transportationPrice);
 		
+		bool succeedBuying = false;;
+		shared_ptr<WProduct> possibleExtractedProduct = sellingCompany->AttemptBuyProduct(succeedBuying, productToPurchase, paidPriceBetweenCompanies, nbProductPurchased);
+
+		if (!succeedBuying)
+		{
+			failedAttempt--;
+			continue;
+		}
+
+		// TODO : here transaction registering
+
+		if (possibleExtractedProduct != nullptr)
+			buyingCompany->AddToRawStock(productBaseInfo, possibleExtractedProduct);
+		else
+			buyingCompany->AddToRawStock(productBaseInfo, productToPurchase);
+
+
+		if (nbWishPurchaseProduct > nbAvailableProductInStock) // Means that keep WishPurchase
+		{
+			marketStock.remove(productToPurchase);
+			marketStocks[productBaseInfo] = marketStock;
+		}
+		else if (nbWishPurchaseProduct == nbAvailableProductInStock) // remove both
+		{
+			purchasingWishes.remove(selectedPurchasingWish);
+			marketStock.remove(productToPurchase);
+			marketStocks[productBaseInfo] = marketStock;
+		}
+		else // nbWishPurchaseProduct < nbAvailableProductInStock   Means that keep product in stock
+		{
+			purchasingWishes.remove(selectedPurchasingWish);
+		}
 	}
-
-
-
 }
 
 

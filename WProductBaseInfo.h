@@ -5,29 +5,31 @@
 class WProductBaseInfo
 {
 private:
-	float floatingPrice;
+	float floatingPricePerUnit;
 
 public:
 	const string name;
 	const int id;
 
 	const float basePrice;
-	const float baseRate;
-	const float baseMargin;
-
-	const int employeDayUnit;
-	const float fabricationCost;
 
 	/// <summary>
-	/// Per kms
+	/// In % -> ex : .20
 	/// </summary>
-	const float transportationCostPerKm;
+	const float baseMargin;
+
+	const float baseProductionCost;
+	const int employeDayUnit;
+
+	const float transportationCostPerKmPerUnit;
 
 	map<shared_ptr<WProductBaseInfo>, int> composition;
 
-	WProductBaseInfo(int _id, WProductBaseInfoBuilder _builder);
+	WProductBaseInfo(shared_ptr<WProductBaseInfoBuilder> _builder);
 	~WProductBaseInfo();
 
 	void UpdateFloatingPrice(float rate);
-	float GetFloatingPrice();
+	float GetFloatingPricePerUnit();
+
+	void AddCompositionProduct(int quantity, shared_ptr<WProductBaseInfo> compositionProduct);
 };

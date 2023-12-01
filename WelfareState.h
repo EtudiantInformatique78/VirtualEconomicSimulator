@@ -4,22 +4,28 @@
 #include "WCompany.h"
 #include "WEconomy.h"
 
+class WEconomy;
+
 class WelfareState
 {
 private:
-	const shared_ptr<WEconomy> economy;
+	shared_ptr<WEconomy> economy;
 	
 	float salaryPool;
 	float transportationPool;
+	float researchPool;
 
 public:
 
 
-	WelfareState(shared_ptr<WEconomy> _economy);
+	WelfareState();
 	~WelfareState();
+
+	void SetEconomy(shared_ptr<WEconomy> _economy);
 
 	void PaySalaries(float value);
 	void PayTransportation(float value);
+	void PayResearch(float value);
 
 	void DistributeMoney();
 

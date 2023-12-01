@@ -8,8 +8,11 @@
 #include "WProduct.h"
 #include "WConstants.h"
 #include "WEconomy.h"
+#include "WPriceDetailsPerUnit.h"
 #include <limits>
 
+class WEconomy;
+class WPurchasingWish;
 /// <summary>
 /// Act as the intermediary between the companies.
 /// The market choose which company buy to which other one
@@ -17,16 +20,17 @@
 class WMarketPlace
 {
 private:
-	const shared_ptr<WEconomy> economy;
+	shared_ptr<WEconomy> economy;
 
 	map<shared_ptr<WProductBaseInfo>, list<shared_ptr<WProduct>>> marketStocks;
-
 	map<shared_ptr<WProductBaseInfo>, list<shared_ptr<WPurchasingWish>>> purchasingWishesByProducts;
 
 
 public:
-	WMarketPlace(shared_ptr<WEconomy> _economy);
+	WMarketPlace();
 	~WMarketPlace();
+
+	void SetEconomy(shared_ptr<WEconomy> _economy);
 
 	void Add(shared_ptr<WCompany> newCompany);
 	void Remove(shared_ptr<WCompany> companyToremove);
@@ -42,6 +46,6 @@ public:
 	void SelectCompanyDealsByProduct(shared_ptr<WProductBaseInfo> productBaseInfo, list<shared_ptr<WPurchasingWish>> purchasingWishes);
 	void SelectCompanyDeals();
 
-	pair<shared_ptr<WProduct>, float> GetCheapestProduct(shared_ptr<WPurchasingWish> purchasingWish, list<shared_ptr<WProduct>>& marketStock);
+	pair<shared_ptr<WProduct>, shared_ptr<WPriceDetailsPerUnit>> GetCheapestProduct(shared_ptr<WPurchasingWish> purchasingWish, list<shared_ptr<WProduct>>& marketStock);
 
 };
